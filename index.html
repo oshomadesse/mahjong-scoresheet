@@ -359,6 +359,28 @@
             font-weight: bold;
         }
 
+        .double-yakuman-badge {
+            background: #000000;
+            color: white;
+            font-size: 9px;
+            padding: 2px 5px;
+            border-radius: 3px;
+            margin-top: 2px;
+            display: inline-block;
+            font-weight: bold;
+        }
+
+        .double-tobashi-badge {
+            background: #800080;
+            color: white;
+            font-size: 9px;
+            padding: 2px 5px;
+            border-radius: 3px;
+            margin-top: 2px;
+            display: inline-block;
+            font-weight: bold;
+        }
+
         /* ==== 対局履歴テーブル：スマホ最適化（iPhone13 mini 完全対応） ==== */
         /* 改行禁止＋余白を詰める */
         .history-table th,
@@ -398,6 +420,8 @@
         .history-table td:nth-child(5) {
             width: auto !important;
             min-width: 40px !important;
+            height: auto !important;
+            vertical-align: middle !important;
         }
         
         /* 操作セル内のボタン（縦並び＋余白あり＋小型化） */
@@ -492,7 +516,7 @@
 
     <script>
         // パスワード認証チェック
-        const PASSWORD = 'kicha2714';
+        const GOMAOPEN = 'kicha2714';
         const AUTH_DURATION = 2 * 60 * 60 * 1000; // 2時間（ミリ秒）
         
         function checkAuth() {
@@ -530,7 +554,7 @@
             const input = document.getElementById('passwordInput');
             const error = document.getElementById('passwordError');
             
-            if (input.value === PASSWORD) {
+            if (input.value === GOMAOPEN) {
                 saveAuth();
                 document.getElementById('passwordOverlay').style.display = 'none';
                 error.textContent = '';
@@ -590,6 +614,12 @@
                             <input type="checkbox" id="yakuman1">
                             <label for="yakuman1">役満</label>
                         </div>
+                    </div>
+                    <div class="yakuman-check">
+                        <div>
+                            <input type="checkbox" id="doubleTobashi1">
+                            <label for="doubleTobashi1">ダブル飛ばし</label>
+                        </div>
                         <div>
                             <input type="checkbox" id="doubleYakuman1">
                             <label for="doubleYakuman1">ダブル役満</label>
@@ -612,6 +642,12 @@
                             <input type="checkbox" id="yakuman2">
                             <label for="yakuman2">役満</label>
                         </div>
+                    </div>
+                    <div class="yakuman-check">
+                        <div>
+                            <input type="checkbox" id="doubleTobashi2">
+                            <label for="doubleTobashi2">ダブル飛ばし</label>
+                        </div>
                         <div>
                             <input type="checkbox" id="doubleYakuman2">
                             <label for="doubleYakuman2">ダブル役満</label>
@@ -633,6 +669,12 @@
                         <div>
                             <input type="checkbox" id="yakuman3">
                             <label for="yakuman3">役満</label>
+                        </div>
+                    </div>
+                    <div class="yakuman-check">
+                        <div>
+                            <input type="checkbox" id="doubleTobashi3">
+                            <label for="doubleTobashi3">ダブル飛ばし</label>
                         </div>
                         <div>
                             <input type="checkbox" id="doubleYakuman3">
@@ -730,7 +772,7 @@
         }
 
         // ポイント計算関数
-        function calculatePoints(scores, yakumanFlags, tobashiFlags, tobiFlags) {
+        function calculatePoints(scores, yakumanFlags, tobashiFlags, tobiFlags, doubleTobashiFlags) {
             // 40000を引いて1000で割る
             const basePoints = scores.map(score => (score - 40000) / 1000);
             
@@ -818,6 +860,17 @@
                 }
             });
             
+            // ダブル飛ばしの処理（飛ばしの2倍）
+            const doubleTobiCount = doubleTobashiFlags.filter(x => x).length;
+            if (doubleTobiCount > 0) {
+                doubleTobashiFlags.forEach((isDoubleTobashi, index) => {
+                    if (isDoubleTobashi) {
+                        // ダブル飛ばしボーナス（飛び1回分の2倍 = 20ポイント）
+                        finalPoints[index] += 20;
+                    }
+                });
+            }
+            
             return finalPoints;
         }
 
@@ -861,6 +914,11 @@
                 document.getElementById('tobi2').checked,
                 document.getElementById('tobi3').checked
             ];
+            const doubleTobashiFlags = [
+                document.getElementById('doubleTobashi1').checked,
+                document.getElementById('doubleTobashi2').checked,
+                document.getElementById('doubleTobashi3').checked
+            ];
             
             // 飛ばしと飛びの1対1対応チェック
             const tobashiCount = tobashiFlags.filter(x => x).length;
@@ -871,7 +929,7 @@
                 return;
             }
             
-            const points = calculatePoints(scores, yakumanFlags, tobashiFlags, tobiFlags);
+            const points = calculatePoints(scores, yakumanFlags, tobashiFlags, tobiFlags, doubleTobashiFlags);
 
             const gameData = {
                 scores: scores,
@@ -880,6 +938,7 @@
                 doubleYakumanFlags: doubleYakumanFlags,
                 tobashiFlags: tobashiFlags,
                 tobiFlags: tobiFlags,
+                doubleTobashiFlags: doubleTobashiFlags,
                 timestamp: Date.now()
             };
 
@@ -904,9 +963,15 @@
             document.getElementById('yakuman1').checked = false;
             document.getElementById('yakuman2').checked = false;
             document.getElementById('yakuman3').checked = false;
+            document.getElementById('doubleYakuman1').checked = false;
+            document.getElementById('doubleYakuman2').checked = false;
+            document.getElementById('doubleYakuman3').checked = false;
             document.getElementById('tobashi1').checked = false;
             document.getElementById('tobashi2').checked = false;
             document.getElementById('tobashi3').checked = false;
+            document.getElementById('doubleTobashi1').checked = false;
+            document.getElementById('doubleTobashi2').checked = false;
+            document.getElementById('doubleTobashi3').checked = false;
             document.getElementById('tobi1').checked = false;
             document.getElementById('tobi2').checked = false;
             document.getElementById('tobi3').checked = false;
@@ -1089,8 +1154,14 @@
                     const yakumanBadge = game.yakumanFlags && game.yakumanFlags[playerIndex] 
                         ? '<div class="yakuman-badge">役満</div>' 
                         : '';
+                    const doubleYakumanBadge = game.doubleYakumanFlags && game.doubleYakumanFlags[playerIndex]
+                        ? '<div class="double-yakuman-badge">ダブル役満</div>'
+                        : '';
                     const tobashiBadge = game.tobashiFlags && game.tobashiFlags[playerIndex]
                         ? '<div class="tobashi-badge">飛ばし</div>'
+                        : '';
+                    const doubleTobashiBadge = game.doubleTobashiFlags && game.doubleTobashiFlags[playerIndex]
+                        ? '<div class="double-tobashi-badge">ダブル飛ばし</div>'
                         : '';
                     const tobiBadge = game.tobiFlags && game.tobiFlags[playerIndex]
                         ? '<div class="tobi-badge">飛び</div>'
@@ -1101,7 +1172,9 @@
                             <div class="player-score">${game.scores[playerIndex]}点</div>
                             <div class="player-point">${game.points[playerIndex] > 0 ? '+' : ''}${game.points[playerIndex]}</div>
                             ${yakumanBadge}
+                            ${doubleYakumanBadge}
                             ${tobashiBadge}
+                            ${doubleTobashiBadge}
                             ${tobiBadge}
                         </div>
                     `;
@@ -1279,11 +1352,3 @@
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
