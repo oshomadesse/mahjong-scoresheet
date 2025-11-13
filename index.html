@@ -317,17 +317,6 @@
             color: #c41e3a;
         }
 
-        .delete-btn {
-            background: #c41e3a;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 12px;
-            transition: background 0.3s ease;
-        }
-
         .delete-btn:hover {
             background: #9a1529;
         }
@@ -337,11 +326,6 @@
             flex-direction: column;
             gap: 6px;
             align-items: center;
-        }
-        
-        .action-cell .delete-btn {
-            width: 55px;
-            padding: 6px 0;
         }
 
         .yakuman-badge {
@@ -375,6 +359,67 @@
             margin-top: 2px;
             display: inline-block;
             font-weight: bold;
+        }
+
+        /* ==== 対局履歴テーブル：スマホ最適化（iPhone13 mini 完全対応） ==== */
+        /* 改行禁止＋余白を詰める */
+        .history-table th,
+        .history-table td {
+            white-space: nowrap;
+            padding: 4px !important;
+        }
+        
+        /* テーブル全体の列幅固定化 */
+        .history-table {
+            table-layout: fixed;
+            width: 100%;
+        }
+        
+        /* 半荘列（改行なし＆小さく固定） */
+        .history-table th:nth-child(1),
+        .history-table td:nth-child(1) {
+            width: 45px !important;
+            min-width: 45px !important;
+            max-width: 45px !important;
+        }
+        
+        /* プレイヤー3列（均等幅で改行なし） */
+        .history-table th:nth-child(2),
+        .history-table th:nth-child(3),
+        .history-table th:nth-child(4),
+        .history-table td:nth-child(2),
+        .history-table td:nth-child(3),
+        .history-table td:nth-child(4) {
+            width: 95px !important;
+            min-width: 95px !important;
+            max-width: 95px !important;
+        }
+        
+        /* 操作列（細い列幅で固定） */
+        .history-table th:nth-child(5),
+        .history-table td:nth-child(5) {
+            width: 50px !important;
+            min-width: 50px !important;
+            max-width: 50px !important;
+            padding: 0 !important;
+        }
+        
+        /* 操作セル内のボタン（縦並び＋余白あり＋小型化） */
+        .action-cell {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            padding: 0 !important;
+        }
+        
+        /* 40px のミニボタンに統一して列幅を抑える *
+        .action-cell button {
+            width: 40px !important;
+            height: 22px;
+            padding: 0 !important;
+            font-size: 10px !important;
+            line-height: 22px;
         }
     </style>
 </head>
@@ -956,38 +1001,31 @@
 
         html += `</tbody></table><br>`;
 
-        // --- 送金計算 ---
-        // 正の人は受け取り、負の人は支払う
-        const receivers = [];
-        const payers = [];
-
-        final.forEach((v, i) => {
-            if (v > 0) receivers.push({ i, amount: v });
-            else if (v < 0) payers.push({ i, amount: -v });
-        });
+        // --- 送金計算（支払い者とのみ清算） ---
+        const payerIndex = parseInt(document.getElementById("payer").value, 10);
 
         html += `<div style="font-weight:bold; font-size:15px; color:#c41e3a;">`;
 
-        // 負の人 → 正の人に順に払う処理
-        let rIndex = 0;
+        // 支払い者以外の最終ポイントを絶対値で支払い者とのやりとりに変換
+        players.forEach((name, i) => {
+            if (i === payerIndex) return; // 支払い者本人はスキップ
 
-        payers.forEach(p => {
-            let remaining = p.amount;
+            const v = final[i];
+            if (v === 0) return; // 0 はやりとりなし
 
-            while (remaining > 0 && rIndex < receivers.length) {
-                const r = receivers[rIndex];
-                const payAmount = Math.min(remaining, r.amount);
+            const amount = Math.abs(v);
 
-                html += `${shortNames[p.i]} ➡️ ${shortNames[r.i]} に ${payAmount} pt<br>`;
-
-                remaining -= payAmount;
-                r.amount -= payAmount;
-
-                if (r.amount === 0) rIndex++;
+            if (v > 0) {
+                // プラス → 支払い者がこの人に払う
+                html += `${shortNames[payerIndex]} ➡️ ${shortNames[i]} に ${amount} pt<br>`;
+            } else {
+                // マイナス → この人が支払い者に払う
+                html += `${shortNames[i]} ➡️ ${shortNames[payerIndex]} に ${amount} pt<br>`;
             }
         });
 
         html += `</div>`;
+
 
         document.getElementById("finalPointsResult").innerHTML = html;
     }
@@ -997,6 +1035,7 @@
     </script>
 </body>
 </html>
+
 
 
 
