@@ -496,13 +496,19 @@
                 </select>
             </div>
         <button class="btn" onclick="calcFinalPoints()">チェック</button>
-        <div id="finalPointsResult" style="margin-top:5px;"></div>
+        <div id="finalPointsResult" style="margin-top:15px;"></div>
         </div>
     </div>
 
     <!-- JavaScript -->
     <script>
         const players = ['🦎ジェッツ西方🦎', '🐺ビースト高橋🐺', '🥊ファイト大田🥊'];
+        const shortNames = players.map(p => {
+            const emoji = p.match(/^(.).*\1$/)?.[1] || "";   // 最初の絵文字
+            const name = p.replace(/.*(西方|高橋|大田).*/, "$1"); // 名字抽出
+            return `${emoji}${name}${emoji}`;
+        });
+
         let sections = []; // 節ごとのデータ [{games: [...]}]
         let currentSectionIndex = 0; // 現在表示中の節のインデックス
         let rankingMode = 'today'; // 'today' or 'total'
@@ -972,7 +978,7 @@
                 const r = receivers[rIndex];
                 const payAmount = Math.min(remaining, r.amount);
 
-                html += `${players[p.i]} ➡️ ${players[r.i]} に ${payAmount} pt<br>`;
+                html += `${shortNames[p.i]} ➡️ ${shortNames[r.i]} に ${payAmount} pt<br>`;
 
                 remaining -= payAmount;
                 r.amount -= payAmount;
@@ -991,5 +997,6 @@
     </script>
 </body>
 </html>
+
 
 
