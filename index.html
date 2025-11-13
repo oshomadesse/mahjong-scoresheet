@@ -331,6 +331,18 @@
         .delete-btn:hover {
             background: #9a1529;
         }
+        
+        .action-cell {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            align-items: center;
+        }
+        
+        .action-cell .delete-btn {
+            width: 55px;
+            padding: 6px 0;
+        }
 
         .yakuman-badge {
             background: #c41e3a;
@@ -484,7 +496,7 @@
                 </select>
             </div>
         <button class="btn" onclick="calcFinalPoints()">チェック</button>
-        <div id="finalPointsResult" style="margin-top:15px;"></div>
+        <div id="finalPointsResult" style="margin-top:5px;"></div>
         </div>
     </div>
 
@@ -979,4 +991,5 @@
     </script>
 </body>
 </html>
+
 
