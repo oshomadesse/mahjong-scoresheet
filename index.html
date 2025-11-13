@@ -430,6 +430,80 @@
     </style>
 </head>
 <body>
+    <!-- パスワード保護のオーバーレイ -->
+    <div id="passwordOverlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:linear-gradient(135deg, #2d5016 0%, #1a3d0a 100%); z-index:10000; display:flex; align-items:center; justify-content:center;">
+        <div style="background:white; padding:30px; border-radius:15px; box-shadow:0 10px 30px rgba(0,0,0,0.3); text-align:center; max-width:400px; width:90%;">
+            <h2 style="color:#2d5016; margin-bottom:20px;">🀄 麻雀スコアシート 🀄</h2>
+            <p style="color:#666; margin-bottom:20px;">アクセスにはパスワードが必要です</p>
+            <input type="password" id="passwordInput" placeholder="パスワードを入力" 
+                style="width:100%; padding:12px; border:2px solid #2d5016; border-radius:8px; font-size:16px; margin-bottom:15px;">
+            <button onclick="checkPassword()" 
+                style="width:100%; background:linear-gradient(135deg, #c41e3a 0%, #9a1529 100%); color:white; border:none; padding:12px; border-radius:8px; font-size:16px; font-weight:bold; cursor:pointer;">
+                ログイン
+            </button>
+            <p id="passwordError" style="color:#c41e3a; margin-top:10px; font-size:14px;"></p>
+        </div>
+    </div>
+
+    <script>
+        // パスワード認証チェック
+        const PASSWORD = 'kicha2714';
+        const AUTH_DURATION = 2 * 60 * 60 * 1000; // 2時間（ミリ秒）
+        
+        function checkAuth() {
+            const authData = localStorage.getItem('mahjong-auth');
+            if (!authData) return false;
+            
+            try {
+                const { timestamp } = JSON.parse(authData);
+                const now = Date.now();
+                // 2時間以内ならOK
+                if (now - timestamp < AUTH_DURATION) {
+                    return true;
+                }
+            } catch (e) {
+                console.error('Auth check error:', e);
+            }
+            
+            return false;
+        }
+        
+        function saveAuth() {
+            localStorage.setItem('mahjong-auth', JSON.stringify({
+                timestamp: Date.now()
+            }));
+        }
+        
+        function checkPassword() {
+            const input = document.getElementById('passwordInput');
+            const error = document.getElementById('passwordError');
+            
+            if (input.value === PASSWORD) {
+                saveAuth();
+                document.getElementById('passwordOverlay').style.display = 'none';
+                error.textContent = '';
+            } else {
+                error.textContent = 'パスワードが正しくありません';
+                input.value = '';
+                input.focus();
+            }
+        }
+        
+        // Enterキーでもログイン
+        document.getElementById('passwordInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                checkPassword();
+            }
+        });
+        
+        // ページ読み込み時の認証チェック
+        if (checkAuth()) {
+            document.getElementById('passwordOverlay').style.display = 'none';
+        } else {
+            document.getElementById('passwordInput').focus();
+        }
+    </script>
+
     <div class="container">
         <h1>🀄 麻雀スコアシート 🀄</h1>
         <h2 style="text-align:center; color:#2d5016; margin-bottom:15px; font-size:18px;">〜 Tリーグ専用 〜</h2>
@@ -977,7 +1051,7 @@
             });
         }
 
-        //最終ロジック
+        //最終ロジック（最小送金回数アルゴリズム）
         function calcFinalPoints() {
             const fee = parseInt(document.getElementById("tableFee").value);
             if (isNaN(fee) || fee <= 0) {
@@ -985,79 +1059,126 @@
                 return;
             }
         
-        // 最新の節の合計ポイントを取得
+            // 最新の節の合計ポイントを取得
             const total = [0, 0, 0];
             const sec = sections[sections.length - 1];
         
-        sec.games.forEach(g => {
-            g.points.forEach((p, i) => total[i] += p);
-        });
+            sec.games.forEach(g => {
+                g.points.forEach((p, i) => total[i] += p);
+            });
         
-        // ① 全員 ×50
+            // ① 全員 ×50
             const moneyPoints = total.map(x => x * 50);
         
-        // ② ゲーム代を3で割る（四捨五入）
+            // ② ゲーム代を3で割る（四捨五入）
             const feeShare = Math.round(fee / 3);
         
-        // ③ 最終ポイント（全員に feeShare を均等に負担）
+            // ③ 最終ポイント（ゲーム代負担前）
             const final = moneyPoints.map(p => p - feeShare);
         
-        // 左側のみ絵文字をつけた名前を生成
-        const leftEmojiNames = players.map(p => {
-            const chars = Array.from(p);  // 絵文字を正しく扱うために配列化
-            const emoji = chars[0];   // 最初の文字（絵文字）
-            const name = p.replace(/.*(西方|高橋|大田).*/, "$1");
-            return `${emoji}${name}`;
-        });
+            // 左側のみ絵文字をつけた名前を生成
+            const leftEmojiNames = players.map(p => {
+                const chars = Array.from(p);
+                const emoji = chars[0];
+                const name = p.replace(/.*(西方|高橋|大田).*/, "$1");
+                return `${emoji}${name}`;
+            });
         
-        // --- 最終ポイント表の生成 ---
-        let html = `
-            <table class="history-table">
-                <thead>
-                    <tr><th>プレイヤー</th><th>最終ポイント</th></tr>
-                </thead>
-                <tbody>
-        `;
+            // --- 最終ポイント表の生成 ---
+            let html = `
+                <table class="history-table">
+                    <thead>
+                        <tr><th>プレイヤー</th><th>最終ポイント</th></tr>
+                    </thead>
+                    <tbody>
+            `;
 
-        players.forEach((name, i) => {
-            html += `<tr><td>${leftEmojiNames[i]}</td><td>${final[i]}</td></tr>`;
-        });
+            players.forEach((name, i) => {
+                html += `<tr><td>${leftEmojiNames[i]}</td><td>${final[i]}</td></tr>`;
+            });
 
+            html += `
+                    </tbody>
+                </table>
+                <br>
+            `;
 
-        html += `
-                </tbody>
-            </table>
-            <br>
-        `;
-
-        // --- 送金計算（支払い者とのみ清算） ---
-        const payerIndex = parseInt(document.getElementById("payer").value, 10);
-
-        html += `<div style="text-align:center; font-size:16px; color:#2d5016; line-height:2; margin-top:10px; padding:15px; background:white; border-radius:8px; border:2px solid #2d5016;">`;
-
-        // 支払い者以外の最終ポイントを絶対値で支払い者とのやりとりに変換
-        players.forEach((name, i) => {
-            if (i === payerIndex) return; // 支払い者本人はスキップ
-
-            const v = final[i];
-            if (v === 0) return; // 0 はやりとりなし
-
-            const amount = Math.abs(v);
-
-            if (v > 0) {
-                // プラス → 支払い者がこの人に払う
-                html += `${leftEmojiNames[payerIndex]} ➡️ ${leftEmojiNames[i]} に <span style="color:#c41e3a; font-weight:bold; font-size:18px;">${amount} pt</span><br>`;
-            } else {
-                // マイナス → この人が支払い者に払う
-                html += `${leftEmojiNames[i]} ➡️ ${leftEmojiNames[payerIndex]} に <span style="color:#c41e3a; font-weight:bold; font-size:18px;">${amount} pt</span><br>`;
+            // --- 最小送金回数アルゴリズム ---
+            const payerIndex = parseInt(document.getElementById("payer").value, 10);
+            
+            // 各プレイヤーのバランスを計算
+            // 支払い者は立て替えているのでゲーム代全額を加算、他は負担分を減算
+            const balances = final.map((pt, i) => {
+                if (i === payerIndex) {
+                    return pt + fee;  // 立て替えた分を加算
+                } else {
+                    return pt;  // 既にfeeShareが引かれている
+                }
+            });
+            
+            // バランスとインデックスを結びつけた配列を作成
+            const balanceData = balances.map((balance, index) => ({
+                index: index,
+                name: leftEmojiNames[index],
+                balance: balance
+            }));
+            
+            // 送金テーブルを計算
+            const transactions = [];
+            const workingBalances = balanceData.map(d => ({ ...d }));
+            
+            while (true) {
+                // 最も債権が多い人（プラスが大きい）
+                let maxCreditor = null;
+                // 最も負債が多い人（マイナスが大きい）
+                let maxDebtor = null;
+                
+                for (const person of workingBalances) {
+                    if (maxCreditor === null || person.balance > maxCreditor.balance) {
+                        maxCreditor = person;
+                    }
+                    if (maxDebtor === null || person.balance < maxDebtor.balance) {
+                        maxDebtor = person;
+                    }
+                }
+                
+                // 全員のバランスが0に近ければ終了（誤差1円まで許容）
+                if (Math.abs(maxCreditor.balance) < 1 && Math.abs(maxDebtor.balance) < 1) {
+                    break;
+                }
+                
+                // 送金額を計算
+                const amount = Math.min(maxCreditor.balance, Math.abs(maxDebtor.balance));
+                
+                if (amount < 1) break;  // 1円未満なら終了
+                
+                // 送金を記録
+                transactions.push({
+                    from: maxDebtor.name,
+                    to: maxCreditor.name,
+                    amount: Math.round(amount)
+                });
+                
+                // バランスを更新
+                maxCreditor.balance -= amount;
+                maxDebtor.balance += amount;
             }
-        });
+            
+            // --- 送金計算の表示 ---
+            html += `<div style="text-align:center; font-size:16px; color:#2d5016; line-height:2; margin-top:10px; padding:15px; background:white; border-radius:8px; border:2px solid #2d5016;">`;
+            
+            if (transactions.length === 0) {
+                html += `<span style="color:#666;">送金の必要はありません</span>`;
+            } else {
+                transactions.forEach(tx => {
+                    html += `${tx.from} ➡️ ${tx.to} に <span style="color:#c41e3a; font-weight:bold; font-size:18px;">${tx.amount} pt</span><br>`;
+                });
+            }
+            
+            html += `</div>`;
 
-        html += `</div>`;
-
-
-        document.getElementById("finalPointsResult").innerHTML = html;
-    }
+            document.getElementById("finalPointsResult").innerHTML = html;
+        }
         
         // ページ読み込み時にデータを読み込む
         window.addEventListener('DOMContentLoaded', loadData);
