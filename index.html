@@ -327,7 +327,7 @@
         }
 
         .yakuman-badge {
-            background: #c41e3a;
+            background: #c39000;
             color: white;
             font-size: 9px;
             padding: 2px 5px;
@@ -338,7 +338,7 @@
         }
 
         .tobashi-badge {
-            background: #ff6b6b;
+            background: #c41e3a;
             color: white;
             font-size: 9px;
             padding: 2px 5px;
@@ -388,9 +388,9 @@
         .history-table td:nth-child(2),
         .history-table td:nth-child(3),
         .history-table td:nth-child(4) {
-            width: 70px !important;
-            min-width: 70px !important;
-            max-width: 70px !important;
+            width: 60px !important;
+            min-width: 60px !important;
+            max-width: 60px !important;
         }
         
         /* 操作列（細い列幅で固定） */
@@ -505,7 +505,6 @@
                 const now = Date.now();
                 // 2時間以内ならOK
                 if (now - timestamp < AUTH_DURATION) {
-                    // アクセス時刻を更新（このタブを開いている限り有効に保つ）
                     updateAuthTimestamp();
                     return true;
                 }
@@ -517,7 +516,13 @@
         }
         
         function saveAuth() {
-            localStorage.setItem('mahjong-auth', JSON.stringify({
+            sessionStorage.setItem('mahjong-auth', JSON.stringify({
+                timestamp: Date.now()
+            }));
+        }
+        
+        function updateAuthTimestamp() {
+            sessionStorage.setItem('mahjong-auth', JSON.stringify({
                 timestamp: Date.now()
             }));
         }
@@ -1100,7 +1105,7 @@
             });
         }
 
-        //最終ロジック（最小送ポイント回数アルゴリズム）
+        //最終ロジック（最小送金回数アルゴリズム）
         function calcFinalPoints() {
             const fee = parseInt(document.getElementById("tableFee").value);
             if (isNaN(fee) || fee <= 0) {
@@ -1152,7 +1157,7 @@
                 <br>
             `;
 
-            // --- 最小送ポイント回数アルゴリズム ---
+            // --- 最小送金回数アルゴリズム ---
             const payerIndex = parseInt(document.getElementById("payer").value, 10);
             
             // 各プレイヤーのバランスを計算
@@ -1172,7 +1177,7 @@
                 balance: balance
             }));
             
-            // 送ポイントテーブルを計算
+            // 送金テーブルを計算
             const transactions = [];
             const workingBalances = balanceData.map(d => ({ ...d }));
             
@@ -1196,12 +1201,12 @@
                     break;
                 }
                 
-                // 送ポイント額を計算
+                // 送金額を計算
                 const amount = Math.min(maxCreditor.balance, Math.abs(maxDebtor.balance));
                 
                 if (amount < 1) break;  // 1円未満なら終了
                 
-                // 送ポイントを記録
+                // 送金を記録
                 transactions.push({
                     from: maxDebtor.name,
                     to: maxCreditor.name,
@@ -1213,16 +1218,31 @@
                 maxDebtor.balance += amount;
             }
             
-            // --- 送ポイント計算の表示 ---
+            // --- 送金計算の表示 ---
             html += `<div style="text-align:center; font-size:16px; color:#2d5016; line-height:2; margin-top:10px; padding:15px; background:white; border-radius:8px; border:2px solid #2d5016;">`;
             
             if (transactions.length === 0) {
-                html += `<span style="color:#666;">送ポイントの必要はありません</span>`;
+                html += `<span style="color:#666;">送金の必要はありません</span>`;
             } else {
                 transactions.forEach(tx => {
                     html += `${tx.from} ➡️ ${tx.to} に <span style="color:#c41e3a; font-weight:bold; font-size:18px;">${tx.amount} pt</span><br>`;
-                });
-            }
+                    });
+                html += `
+                    <a href="paypay://"
+                        style="
+                            display:inline-block;
+                            margin-top:10px;
+                            padding:5px 20px;
+                            background:#FF0033;
+                            color:white;
+                            font-weight:bold;
+                            border-radius:8px;
+                            text-decoration:none;
+                        ">
+                        PayPayを開く
+                    </a>
+                `;
+                }
             
             html += `</div>`;
 
@@ -1288,6 +1308,9 @@
     </script>
 </body>
 </html>
+
+
+
 
 
 
