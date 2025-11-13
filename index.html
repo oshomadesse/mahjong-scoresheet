@@ -322,10 +322,8 @@
             flex-direction: column !important;
             align-items: center !important;
             gap: 6px !important;
-            padding: 0 !important;
+            padding: 8px 4px !important;
             white-space: normal !important;
-        }
-
         }
 
         .yakuman-badge {
@@ -400,7 +398,7 @@
         .history-table td:nth-child(5) {
             width: auto !important;
             min-width: 40px !important;
-            padding: 0 !important;
+            padding: 8px 4px !important;
         }
         
         /* 操作セル内のボタン（縦並び＋余白あり＋小型化） */
@@ -412,6 +410,22 @@
             font-size: 10px !important;
             line-height: 22px !important;
             margin: 0 !important;
+            border: 1px solid #2d5016;
+            border-radius: 4px;
+            background: white;
+            color: #2d5016;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s ease;
+        }
+
+        .action-cell button:hover {
+            background: #e8f5e9;
+            transform: scale(1.05);
+        }
+
+        .action-cell button:active {
+            transform: scale(0.95);
         }
     </style>
 </head>
@@ -541,9 +555,11 @@
     <script>
         const players = ['🦎ジェッツ西方🦎', '🐺ビースト高橋🐺', '🥊ファイト大田🥊'];
         const shortNames = players.map(p => {
-            const emoji = p.match(/^(.).*\1$/)?.[1] || "";   // 最初の絵文字
+            const chars = Array.from(p);  // 絵文字を正しく扱うために配列化
+            const emojiStart = chars[0];   // 最初の文字（絵文字）
+            const emojiEnd = chars[chars.length - 1];   // 最後の文字（絵文字）
             const name = p.replace(/.*(西方|高橋|大田).*/, "$1"); // 名字抽出
-            return `${emoji}${name}${emoji}`;
+            return `${emojiStart}${name}${emojiEnd}`;
         });
 
         let sections = []; // 節ごとのデータ [{games: [...]}]
@@ -687,6 +703,15 @@
                 document.getElementById('tobi2').checked,
                 document.getElementById('tobi3').checked
             ];
+            
+            // 飛ばしと飛びの1対1対応チェック
+            const tobashiCount = tobashiFlags.filter(x => x).length;
+            const tobiCount = tobiFlags.filter(x => x).length;
+            
+            if (tobashiCount !== tobiCount) {
+                alert(`「飛ばし」と「飛び」は1対1で対応させる必要があります\n現在：飛ばし ${tobashiCount}人、飛び ${tobiCount}人`);
+                return;
+            }
             
             const points = calculatePoints(scores, yakumanFlags, tobashiFlags, tobiFlags);
 
@@ -931,18 +956,18 @@
                     row.appendChild(cell);
                 });
 
+                // 操作セル（重要：classNameを設定）
                 const actionCell = document.createElement('td');
+                actionCell.className = 'action-cell';
                 
                 // 編集ボタン
                 const editBtn = document.createElement('button');
-                editBtn.className = 'edit-btn';
                 editBtn.textContent = '編集';
                 editBtn.onclick = () => editGame(currentSectionIndex, gameIndex);
                 actionCell.appendChild(editBtn);
                 
                 // 削除ボタン
                 const deleteBtn = document.createElement('button');
-                deleteBtn.className = 'delete-btn';
                 deleteBtn.textContent = '削除';
                 deleteBtn.onclick = () => deleteGame(currentSectionIndex, gameIndex);
                 actionCell.appendChild(deleteBtn);
@@ -977,6 +1002,14 @@
         // ③ 最終ポイント（全員に feeShare を均等に負担）
             const final = moneyPoints.map(p => p - feeShare);
         
+        // 左側のみ絵文字をつけた名前を生成
+        const leftEmojiNames = players.map(p => {
+            const chars = Array.from(p);  // 絵文字を正しく扱うために配列化
+            const emoji = chars[0];   // 最初の文字（絵文字）
+            const name = p.replace(/.*(西方|高橋|大田).*/, "$1");
+            return `${emoji}${name}`;
+        });
+        
         // --- 最終ポイント表の生成 ---
         let html = `
             <table class="history-table">
@@ -987,7 +1020,7 @@
         `;
 
         players.forEach((name, i) => {
-            html += `<tr><td>${shortNames[i]}</td><td>${final[i]}</td></tr>`;
+            html += `<tr><td>${leftEmojiNames[i]}</td><td>${final[i]}</td></tr>`;
         });
 
 
@@ -1000,7 +1033,7 @@
         // --- 送金計算（支払い者とのみ清算） ---
         const payerIndex = parseInt(document.getElementById("payer").value, 10);
 
-        html += `<div style="font-weight:bold; font-size:15px; color:#c41e3a;">`;
+        html += `<div style="text-align:center; font-size:16px; color:#2d5016; line-height:2; margin-top:10px; padding:15px; background:white; border-radius:8px; border:2px solid #2d5016;">`;
 
         // 支払い者以外の最終ポイントを絶対値で支払い者とのやりとりに変換
         players.forEach((name, i) => {
@@ -1013,10 +1046,10 @@
 
             if (v > 0) {
                 // プラス → 支払い者がこの人に払う
-                html += `${shortNames[payerIndex]} ➡️ ${shortNames[i]} に ${amount} pt<br>`;
+                html += `${leftEmojiNames[payerIndex]} ➡️ ${leftEmojiNames[i]} に <span style="color:#c41e3a; font-weight:bold; font-size:18px;">${amount} pt</span><br>`;
             } else {
                 // マイナス → この人が支払い者に払う
-                html += `${shortNames[i]} ➡️ ${shortNames[payerIndex]} に ${amount} pt<br>`;
+                html += `${leftEmojiNames[i]} ➡️ ${leftEmojiNames[payerIndex]} に <span style="color:#c41e3a; font-weight:bold; font-size:18px;">${amount} pt</span><br>`;
             }
         });
 
