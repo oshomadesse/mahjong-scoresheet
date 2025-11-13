@@ -451,7 +451,7 @@
         const AUTH_DURATION = 2 * 60 * 60 * 1000; // 2時間（ミリ秒）
         
         function checkAuth() {
-            const authData = localStorage.getItem('mahjong-auth');
+            const authData = sessionStorage.getItem('mahjong-auth');
             if (!authData) return false;
             
             try {
@@ -459,6 +459,7 @@
                 const now = Date.now();
                 // 2時間以内ならOK
                 if (now - timestamp < AUTH_DURATION) {
+                    updateAuthTimestamp();
                     return true;
                 }
             } catch (e) {
@@ -469,7 +470,13 @@
         }
         
         function saveAuth() {
-            localStorage.setItem('mahjong-auth', JSON.stringify({
+            sessionStorage.setItem('mahjong-auth', JSON.stringify({
+                timestamp: Date.now()
+            }));
+        }
+        
+        function updateAuthTimestamp() {
+            sessionStorage.setItem('mahjong-auth', JSON.stringify({
                 timestamp: Date.now()
             }));
         }
@@ -1201,3 +1208,4 @@
     </script>
 </body>
 </html>
+
