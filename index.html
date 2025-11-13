@@ -369,7 +369,7 @@
 <body>
     <div class="container">
         <h1>🀄 麻雀スコアシート 🀄</h1>
-        <h2 style="text-align:center; color:#2d5016; margin-bottom:15px; font-size:16px;">〜 Tリーグ 〜</h2>
+        <h2 style="text-align:center; color:#2d5016; margin-bottom:15px; font-size:24px;">〜 Tリーグ専用 〜</h2>
 
         <!-- 順位表 -->
         <div class="section">
@@ -470,13 +470,14 @@
             
             <div class="input-grid">
                 <div class="input-item">
-                    <label>場代（円）</label>
+                    <label>ゲーム代（円）</label>
                     <input type="number" id="tableFee" placeholder="例：6000">
                 </div>
 
             <div class="input-item">
                 <label>支払い者</label>
-                <select id="payer" style="padding:10px; border:2px solid #2d5016; border-radius:8px;">
+                <select id="payer" 
+                    style="padding:15px; font-size:18px; border:2px solid #2d5016; border-radius:12px; width:100%;">
                     <option value="0">🦎ジェッツ西方🦎</option>
                     <option value="1">🐺ビースト高橋🐺</option>
                     <option value="2">🥊ファイト大田🥊</option>
@@ -608,6 +609,14 @@
                 alert('すべての点数を入力してください');
                 return;
             }
+            
+            // 合計105000チェック
+            const sum = score1 + score2 + score3;
+            if (sum !== 105000) {
+                alert(`3人の点数の合計が 105000 ではありません（現在: ${sum}）`);
+                return;
+            }
+
 
             const scores = [score1, score2, score3];
             const yakumanFlags = [
@@ -671,20 +680,49 @@
             if (confirm('この対局を削除しますか？')) {
                 sections[sectionIndex].games.splice(gameIndex, 1);
                 
-                // 節が空になった場合、節自体を削除（ただし最後の節は残す）
                 if (sections[sectionIndex].games.length === 0 && sections.length > 1) {
                     sections.splice(sectionIndex, 1);
-                    // 表示中の節のインデックスを調整
                     if (currentSectionIndex >= sections.length) {
                         currentSectionIndex = sections.length - 1;
                     }
                 }
-                
                 saveData();
                 updateRanking();
                 updateHistory();
             }
         }
+        function editGame(sectionIndex, gameIndex) {
+            const game = sections[sectionIndex].games[gameIndex];
+            
+            const newScores = game.scores.map((s, i) =>
+                parseInt(prompt(`${players[i]} の点数を入力`, s))
+            );
+        
+        if (newScores.some(s => isNaN(s))) {
+            alert("正しい点数を入力してください");
+            return;
+        }
+        
+        if (newScores[0] + newScores[1] + newScores[2] !== 105000) {
+            alert("3人の点数の合計が 105000 ではありません。");
+            return;
+        }
+        
+        const newPoints = calculatePoints(
+            newScores,
+            game.yakumanFlags,
+            game.tobashiFlags,
+            game.tobiFlags
+        );
+        
+        game.scores = newScores;
+        game.points = newPoints;
+        
+        saveData();
+        updateHistory();
+        updateRanking();
+    }
+
 
         // 新しい節を追加
         function addNewSection() {
@@ -811,7 +849,7 @@
                 
                 // 半荘番号
                 const gameNumCell = document.createElement('td');
-                gameNumCell.textContent = `${gameIndex + 1}半荘`;
+                gameNumCell.textContent = `${gameIndex + 1}`;
                 gameNumCell.style.fontWeight = 'bold';
                 row.appendChild(gameNumCell);
 
@@ -840,8 +878,15 @@
                     row.appendChild(cell);
                 });
 
+                // 編集ボタン
+                const editBtn = document.createElement('button');
+                editBtn.className = 'delete-btn';
+                editBtn.style.background = '#2d5016';
+                editBtn.textContent = '編集';
+                editBtn.onclick = () => editGame(currentSectionIndex, gameIndex);
+                actionCell.appendChild(editBtn);
+                
                 // 削除ボタン
-                const actionCell = document.createElement('td');
                 const deleteBtn = document.createElement('button');
                 deleteBtn.className = 'delete-btn';
                 deleteBtn.textContent = '削除';
@@ -857,63 +902,70 @@
         function calcFinalPoints() {
             const fee = parseInt(document.getElementById("tableFee").value);
             if (isNaN(fee) || fee <= 0) {
-                alert("場代を入力してください");
+                alert("ゲーム代を入力してください");
                 return;
             }
-            const payer = parseInt(document.getElementById("payer").value);
-            
-        // 最新の節の合計ポイント取得
-            const total = [0,0,0];
+        
+        // 最新の節の合計ポイントを取得
+            const total = [0, 0, 0];
             const sec = sections[sections.length - 1];
-            
-            sec.games.forEach(g=>{
-                g.points.forEach((p,i)=> total[i] += p);
-            });
         
-        // 各者 ×50
+        sec.games.forEach(g => {
+            g.points.forEach((p, i) => total[i] += p);
+        });
+        
+        // ① 全員 ×50
             const moneyPoints = total.map(x => x * 50);
-            
-        // 場代 / 3（四捨五入）
-            const feeShare = Math.round(fee / 3);
-            
-        // 支払い者以外は + feeShare、支払い者は計算後に調整だけ表示
-            const after = moneyPoints.map((p,i)=>
-                i === payer ? p : p + feeShare
-            );
-       
-        // 支払い者が受け取るべき金額を計算
-            const payerReceive = moneyPoints[payer] - (moneyPoints[payer] - feeShare * 2);
         
-        // 結果表示
+        // ② ゲーム代を3で割る（四捨五入）
+            const feeShare = Math.round(fee / 3);
+        
+        // ③ 最終ポイント（全員に feeShare を均等に負担）
+            const final = moneyPoints.map(p => p - feeShare);
+        
+        // --- 最終ポイント表の生成 ---
         let html = `
             <table class="history-table">
                 <thead>
-                    <tr>
-                        <th>プレイヤー</th>
-                        <th>精算ポイント</th>
-                    </tr>
+                    <tr><th>プレイヤー</th><th>最終ポイント</th></tr>
                 </thead>
                 <tbody>
         `;
-        
-        players.forEach((name,i)=>{
-            html += `
-                <tr>
-                    <td>${name}</td>
-                    <td>${after[i]}</td>
-                </tr>
-            `;
+
+        players.forEach((name, i) => {
+            html += `<tr><td>${name}</td><td>${final[i]}</td></tr>`;
         });
 
         html += `</tbody></table><br>`;
 
-        // 結果表示
+        // --- 送金計算 ---
+        // 正の人は受け取り、負の人は支払う
+        const receivers = [];
+        const payers = [];
+
+        final.forEach((v, i) => {
+            if (v > 0) receivers.push({ i, amount: v });
+            else if (v < 0) payers.push({ i, amount: -v });
+        });
+
         html += `<div style="font-weight:bold; font-size:15px; color:#c41e3a;">`;
 
-        players.forEach((name,i)=>{
-            if (i !== payer) {
-                const move = (after[i] - moneyPoints[i]);
-                html += `${name} ➡️ ${players[payer]} に ${move} pt<br>`;
+        // 負の人 → 正の人に順に払う処理
+        let rIndex = 0;
+
+        payers.forEach(p => {
+            let remaining = p.amount;
+
+            while (remaining > 0 && rIndex < receivers.length) {
+                const r = receivers[rIndex];
+                const payAmount = Math.min(remaining, r.amount);
+
+                html += `${players[p.i]} ➡️ ${players[r.i]} に ${payAmount} pt<br>`;
+
+                remaining -= payAmount;
+                r.amount -= payAmount;
+
+                if (r.amount === 0) rIndex++;
             }
         });
 
@@ -921,14 +973,9 @@
 
         document.getElementById("finalPointsResult").innerHTML = html;
     }
-
         
         // ページ読み込み時にデータを読み込む
         window.addEventListener('DOMContentLoaded', loadData);
     </script>
 </body>
 </html>
-
-
-
-
