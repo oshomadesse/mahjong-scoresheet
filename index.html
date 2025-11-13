@@ -1105,7 +1105,7 @@
             });
         }
 
-        //最終ロジック（最小送金回数アルゴリズム）
+        //最終ロジック（最小送ポイント回数アルゴリズム）
         function calcFinalPoints() {
             const fee = parseInt(document.getElementById("tableFee").value);
             if (isNaN(fee) || fee <= 0) {
@@ -1124,8 +1124,8 @@
             // ① 全員 ×50
             const moneyPoints = total.map(x => x * 50);
         
-            // ② ゲーム代を3で割る（四捨五入）
-            const feeShare = Math.round(fee / 3);
+            // ② ゲーム代を3で割る（切り上げ）
+            const feeShare = Math.ceil(fee / 3);
         
             // ③ 最終ポイント（ゲーム代負担前）
             const final = moneyPoints.map(p => p - feeShare);
@@ -1157,7 +1157,7 @@
                 <br>
             `;
 
-            // --- 最小送金回数アルゴリズム ---
+            // --- 最小送ポイント回数アルゴリズム ---
             const payerIndex = parseInt(document.getElementById("payer").value, 10);
             
             // 各プレイヤーのバランスを計算
@@ -1177,7 +1177,7 @@
                 balance: balance
             }));
             
-            // 送金テーブルを計算
+            // 送ポイントテーブルを計算
             const transactions = [];
             const workingBalances = balanceData.map(d => ({ ...d }));
             
@@ -1201,12 +1201,12 @@
                     break;
                 }
                 
-                // 送金額を計算
+                // 送ポイント額を計算
                 const amount = Math.min(maxCreditor.balance, Math.abs(maxDebtor.balance));
                 
                 if (amount < 1) break;  // 1円未満なら終了
                 
-                // 送金を記録
+                // 送ポイントを記録
                 transactions.push({
                     from: maxDebtor.name,
                     to: maxCreditor.name,
@@ -1218,11 +1218,11 @@
                 maxDebtor.balance += amount;
             }
             
-            // --- 送金計算の表示 ---
+            // --- 送ポイント計算の表示 ---
             html += `<div style="text-align:center; font-size:16px; color:#2d5016; line-height:2; margin-top:10px; padding:15px; background:white; border-radius:8px; border:2px solid #2d5016;">`;
             
             if (transactions.length === 0) {
-                html += `<span style="color:#666;">送金の必要はありません</span>`;
+                html += `<span style="color:#666;">送ポイントの必要はありません</span>`;
             } else {
                 transactions.forEach(tx => {
                     html += `${tx.from} ➡️ ${tx.to} に <span style="color:#c41e3a; font-weight:bold; font-size:18px;">${tx.amount} pt</span><br>`;
@@ -1250,61 +1250,14 @@
             updatePayPayBlock(transactions);
         }
         
-        function updatePayPayBlock(transactions) {
-            const block = document.getElementById("paypayLinkBlock");
-            if (!block) return;
-
-            if (!transactions.length) {
-                block.innerHTML = "";
-                block.style.display = "none";
-                return;
-            }
-
-            const paypayIds = getPayPayIds();
-            const content = transactions.map((tx, idx) => {
-                const recipientId = resolvePlayerId(tx.to, paypayIds);
-                const link = recipientId ? buildPayPayLink(recipientId, tx.amount) : null;
-                const label = `${tx.from} ➡ ${tx.to} へ ${tx.amount.toLocaleString()} pt 送ポイント`;
-                if (link) {
-                    return `<a class="paypay-button" href="${link}" target="_blank" rel="noopener noreferrer">${label} / PayPayを開く</a>`;
-                }
-                return `<span class="paypay-button paypay-button--disabled" title="PayPay ID未設定">${label}</span>`;
-            }).join("");
-
-            block.innerHTML = `
-                <p class="paypay-block__title">PayPayを開いて送ポイント</p>
-                ${content}
-            `;
-            block.style.display = "flex";
-        }
-
-        function getPayPayIds() {
-            const config = window.MAHJONG_SCORE_CONFIG || window.PAYPAY_IDS || {};
-            return [
-                config.nishikataId || "",
-                config.takahashiId || "",
-                config.otaId || ""
-            ];
-        }
-
-        function resolvePlayerId(displayName, idList) {
-            if (!displayName) return "";
-            if (displayName.includes("西方")) return idList[0];
-            if (displayName.includes("高橋")) return idList[1];
-            if (displayName.includes("大田")) return idList[2];
-            return "";
-        }
-
-        function buildPayPayLink(payPayId, amount) {
-            const safeAmount = Math.max(0, Math.round(amount));
-            if (!payPayId || !safeAmount) return "";
-            const encodedId = encodeURIComponent(payPayId);
-            const encodedAmount = encodeURIComponent(safeAmount);
-            return `paypay://wallet/send?recipientPayPayId=${encodedId}&amount=${encodedAmount}`;
-        }
-        
         // ページ読み込み時にデータを読み込む
         window.addEventListener('DOMContentLoaded', loadData);
     </script>
 </body>
 </html>
+
+
+
+
+
+
