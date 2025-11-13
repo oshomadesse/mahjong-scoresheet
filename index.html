@@ -398,7 +398,6 @@
         .history-table td:nth-child(5) {
             width: auto !important;
             min-width: 40px !important;
-            padding: 8px 4px !important;
         }
         
         /* 操作セル内のボタン（縦並び＋余白あり＋小型化） */
@@ -580,16 +579,20 @@
                     <input type="number" id="score1" placeholder="点数を入力" step="100">
                     <div class="yakuman-check">
                         <div>
-                            <input type="checkbox" id="yakuman1">
-                            <label for="yakuman1">役満</label>
-                        </div>
-                        <div>
                             <input type="checkbox" id="tobashi1">
                             <label for="tobashi1">飛ばし</label>
                         </div>
                         <div>
                             <input type="checkbox" id="tobi1">
                             <label for="tobi1">飛び</label>
+                        </div>
+                        <div>
+                            <input type="checkbox" id="yakuman1">
+                            <label for="yakuman1">役満</label>
+                        </div>
+                        <div>
+                            <input type="checkbox" id="doubleYakuman1">
+                            <label for="doubleYakuman1">ダブル役満</label>
                         </div>
                     </div>
                 </div>
@@ -598,16 +601,20 @@
                     <input type="number" id="score2" placeholder="点数を入力" step="100">
                     <div class="yakuman-check">
                         <div>
-                            <input type="checkbox" id="yakuman2">
-                            <label for="yakuman2">役満</label>
-                        </div>
-                        <div>
                             <input type="checkbox" id="tobashi2">
                             <label for="tobashi2">飛ばし</label>
                         </div>
                         <div>
                             <input type="checkbox" id="tobi2">
                             <label for="tobi2">飛び</label>
+                        </div>
+                        <div>
+                            <input type="checkbox" id="yakuman2">
+                            <label for="yakuman2">役満</label>
+                        </div>
+                        <div>
+                            <input type="checkbox" id="doubleYakuman2">
+                            <label for="doubleYakuman2">ダブル役満</label>
                         </div>
                     </div>
                 </div>
@@ -616,16 +623,20 @@
                     <input type="number" id="score3" placeholder="点数を入力" step="100">
                     <div class="yakuman-check">
                         <div>
-                            <input type="checkbox" id="yakuman3">
-                            <label for="yakuman3">役満</label>
-                        </div>
-                        <div>
                             <input type="checkbox" id="tobashi3">
                             <label for="tobashi3">飛ばし</label>
                         </div>
                         <div>
                             <input type="checkbox" id="tobi3">
                             <label for="tobi3">飛び</label>
+                        </div>
+                        <div>
+                            <input type="checkbox" id="yakuman3">
+                            <label for="yakuman3">役満</label>
+                        </div>
+                        <div>
+                            <input type="checkbox" id="doubleYakuman3">
+                            <label for="doubleYakuman3">ダブル役満</label>
                         </div>
                     </div>
                 </div>
@@ -792,6 +803,20 @@
                     }
                 }
             });
+
+            // ダブル役満の処理（役満の2倍）
+            doubleYakumanFlags.forEach((hasDouble, index) => {
+                if (hasDouble) {
+                    // アガった人に +80
+                    finalPoints[index] += 80;
+                // 他2人に −40ずつ
+                for (let i = 0; i < 3; i++) {
+                        if (i !== index) {
+                            finalPoints[i] -= 40;
+                        }
+                    }
+                }
+            });
             
             return finalPoints;
         }
@@ -821,6 +846,11 @@
                 document.getElementById('yakuman2').checked,
                 document.getElementById('yakuman3').checked
             ];
+            const doubleYakumanFlags = [
+                document.getElementById('doubleYakuman1').checked,
+                document.getElementById('doubleYakuman2').checked,
+                document.getElementById('doubleYakuman3').checked
+            ];
             const tobashiFlags = [
                 document.getElementById('tobashi1').checked,
                 document.getElementById('tobashi2').checked,
@@ -847,6 +877,7 @@
                 scores: scores,
                 points: points,
                 yakumanFlags: yakumanFlags,
+                doubleYakumanFlags: doubleYakumanFlags,
                 tobashiFlags: tobashiFlags,
                 tobiFlags: tobiFlags,
                 timestamp: Date.now()
@@ -897,37 +928,30 @@
                 updateHistory();
             }
         }
+        
         function editGame(sectionIndex, gameIndex) {
-            const game = sections[sectionIndex].games[gameIndex];
-            
-            const newScores = game.scores.map((s, i) =>
-                parseInt(prompt(`${players[i]} の点数を入力`, s))
+            const newPoints = game.points.map((pt, i) =>
+                parseFloat(prompt(`${players[i]} のポイントを入力（例：+32 → 32）`, pt))
             );
+
+            if (newPoints.some(p => isNaN(p))) {
+                alert("正しいポイントを入力してください");
+                return;
+            }
+            
+            const sum = newPoints[0] + newPoints[1] + newPoints[2];
+            if (sum !== 0) {
+                alert("3人のポイントの合計が 0 ではありません。");
+                return;
+            }
+
+            // ポイントをそのまま保存
+            game.points = newPoints;
         
-        if (newScores.some(s => isNaN(s))) {
-            alert("正しい点数を入力してください");
-            return;
+            saveData();
+            updateHistory();
+            updateRanking();
         }
-        
-        if (newScores[0] + newScores[1] + newScores[2] !== 105000) {
-            alert("3人の点数の合計が 105000 ではありません。");
-            return;
-        }
-        
-        const newPoints = calculatePoints(
-            newScores,
-            game.yakumanFlags,
-            game.tobashiFlags,
-            game.tobiFlags
-        );
-        
-        game.scores = newScores;
-        game.points = newPoints;
-        
-        saveData();
-        updateHistory();
-        updateRanking();
-    }
 
 
         // 新しい節を追加
@@ -1255,6 +1279,7 @@
     </script>
 </body>
 </html>
+
 
 
 
