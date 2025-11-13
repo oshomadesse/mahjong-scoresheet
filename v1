@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tリーグ</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', 'Meiryo', sans-serif;
+            background: linear-gradient(135deg, #2d5016 0%, #1a3d0a 100%);
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            padding: 15px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #c41e3a;
+            margin-bottom: 20px;
+            font-size: 24px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .section {
+            background: #e8f5e9;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 2px solid #2d5016;
+        }
+
+        .section-title {
+            color: #2d5016;
+            margin-bottom: 15px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .ranking-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            justify-content: center;
+        }
+
+        .ranking-tab {
+            background: white;
+            border: 2px solid #2d5016;
+            padding: 8px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            color: #2d5016;
+            font-size: 14px;
+        }
+
+        .ranking-tab:hover {
+            background: #e8f5e9;
+        }
+
+        .ranking-tab.active {
+            background: linear-gradient(135deg, #2d5016 0%, #1a3d0a 100%);
+            color: white;
+        }
+
+        .ranking-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            margin: 8px 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border: 2px solid #2d5016;
+        }
+
+        .ranking-item.first {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            border: 3px solid #daa520;
+        }
+
+        .ranking-item.second {
+            background: linear-gradient(135deg, #c0c0c0 0%, #e8e8e8 100%);
+            border: 3px solid #a8a8a8;
+        }
+
+        .ranking-item.third {
+            background: linear-gradient(135deg, #cd7f32 0%, #e8a562 100%);
+            border: 3px solid #b8732d;
+        }
+
+        .rank-number {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+            min-width: 35px;
+        }
+
+        .player-name {
+            font-size: 14px;
+            font-weight: bold;
+            color: #2d5016;
+            flex: 1;
+            margin-left: 10px;
+            white-space: nowrap;
+            padding-right: 10px;
+            border-right: 3px solid rgba(45, 80, 22, 0.3);
+        }
+
+        .player-points {
+            font-size: 18px;
+            font-weight: bold;
+            color: #c41e3a;
+            margin-left: 10px;
+            min-width: 50px;
+            text-align: right;
+        }
+
+        .input-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .input-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-item label {
+            font-weight: bold;
+            color: #2d5016;
+            margin-bottom: 5px;
+            font-size: 13px;
+        }
+
+        .input-item input {
+            padding: 10px;
+            border: 2px solid #2d5016;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+            background: white;
+        }
+
+        .input-item input:focus {
+            outline: none;
+            border-color: #c41e3a;
+        }
+
+        .yakuman-check {
+            display: flex;
+            align-items: center;
+            margin-top: 5px;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .yakuman-check > div {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .yakuman-check input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            accent-color: #c41e3a;
+        }
+
+        .yakuman-check label {
+            margin: 0;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #c41e3a;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #c41e3a 0%, #9a1529 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            width: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(196, 30, 58, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .tabs-container {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .tab {
+            background: white;
+            border: 2px solid #2d5016;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            color: #2d5016;
+            font-size: 13px;
+        }
+
+        .tab:hover {
+            background: #e8f5e9;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #2d5016 0%, #1a3d0a 100%);
+            color: white;
+        }
+
+        .add-section-btn {
+            background: linear-gradient(135deg, #c41e3a 0%, #9a1529 100%);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            font-size: 13px;
+        }
+
+        .add-section-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 3px 10px rgba(196, 30, 58, 0.4);
+        }
+
+        .history-table-container {
+            overflow-x: auto;
+        }
+
+        .history-table {
+            width: 100%;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px solid #2d5016;
+            border-collapse: collapse;
+        }
+
+        .history-table th {
+            background: linear-gradient(135deg, #2d5016 0%, #1a3d0a 100%);
+            color: white;
+            padding: 10px 5px;
+            text-align: center;
+            font-size: 11px;
+            border: 1px solid #1a3d0a;
+        }
+
+        .history-table td {
+            padding: 8px 5px;
+            text-align: center;
+            border: 1px solid #e0e0e0;
+            font-size: 12px;
+        }
+
+        .history-table tr:nth-child(even) {
+            background: #f5f5f5;
+        }
+
+        .history-table tr:hover {
+            background: #e8f5e9;
+        }
+
+        .player-cell {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .player-score {
+            font-size: 11px;
+            color: #666;
+        }
+
+        .player-point {
+            font-weight: bold;
+            font-size: 13px;
+            color: #c41e3a;
+        }
+
+        .delete-btn {
+            background: #c41e3a;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.3s ease;
+        }
+
+        .delete-btn:hover {
+            background: #9a1529;
+        }
+
+        .yakuman-badge {
+            background: #c41e3a;
+            color: white;
+            font-size: 9px;
+            padding: 2px 5px;
+            border-radius: 3px;
+            margin-top: 2px;
+            display: inline-block;
+            font-weight: bold;
+        }
+
+        .tobashi-badge {
+            background: #ff6b6b;
+            color: white;
+            font-size: 9px;
+            padding: 2px 5px;
+            border-radius: 3px;
+            margin-top: 2px;
+            display: inline-block;
+            font-weight: bold;
+        }
+
+        .tobi-badge {
+            background: #2d5016;
+            color: white;
+            font-size: 9px;
+            padding: 2px 5px;
+            border-radius: 3px;
+            margin-top: 2px;
+            display: inline-block;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🀄 Tリーグ 🀄</h1>
+
+        <!-- 順位表 -->
+        <div class="section">
+            <h3 class="section-title">📊 順位表</h3>
+            <div class="ranking-tabs">
+                <div class="ranking-tab active" onclick="switchRankingTab('today')">本日</div>
+                <div class="ranking-tab" onclick="switchRankingTab('total')">全体</div>
+            </div>
+            <div id="rankingList"></div>
+        </div>
+
+        <!-- 対局入力 -->
+        <div class="section">
+            <h3 class="section-title">✏️ 対局結果入力</h3>
+            <div class="input-grid">
+                <div class="input-item">
+                    <label>ジェッツ西方</label>
+                    <input type="number" id="score1" placeholder="点数を入力" step="100">
+                    <div class="yakuman-check">
+                        <div>
+                            <input type="checkbox" id="yakuman1">
+                            <label for="yakuman1">役満</label>
+                        </div>
+                        <div>
+                            <input type="checkbox" id="tobashi1">
+                            <label for="tobashi1">飛ばし</label>
+                        </div>
+                        <div>
+                            <input type="checkbox" id="tobi1">
+                            <label for="tobi1">飛び</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="input-item">
+                    <label>ビースト高橋</label>
+                    <input type="number" id="score2" placeholder="点数を入力" step="100">
+                    <div class="yakuman-check">
+                        <div>
+                            <input type="checkbox" id="yakuman2">
+                            <label for="yakuman2">役満</label>
+                        </div>
+                        <div>
+                            <input type="checkbox" id="tobashi2">
+                            <label for="tobashi2">飛ばし</label>
+                        </div>
+                        <div>
+                            <input type="checkbox" id="tobi2">
+                            <label for="tobi2">飛び</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="input-item">
+                    <label>ファイト大田</label>
+                    <input type="number" id="score3" placeholder="点数を入力" step="100">
+                    <div class="yakuman-check">
+                        <div>
+                            <input type="checkbox" id="yakuman3">
+                            <label for="yakuman3">役満</label>
+                        </div>
+                        <div>
+                            <input type="checkbox" id="tobashi3">
+                            <label for="tobashi3">飛ばし</label>
+                        </div>
+                        <div>
+                            <input type="checkbox" id="tobi3">
+                            <label for="tobi3">飛び</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button class="btn" onclick="addGame()">対局を記録</button>
+        </div>
+
+        <!-- 対局履歴 -->
+        <div class="section">
+            <h3 class="section-title">📜 対局履歴</h3>
+            <div class="tabs-container" id="tabsContainer"></div>
+            <div class="history-table-container">
+                <table class="history-table" id="historyTable">
+                    <thead>
+                        <tr>
+                            <th>半荘</th>
+                            <th>西方</th>
+                            <th>高橋</th>
+                            <th>大田</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyList">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        const players = ['ジェッツ西方', 'ビースト高橋', 'ファイト大田'];
+        let sections = []; // 節ごとのデータ [{games: [...]}]
+        let currentSectionIndex = 0; // 現在表示中の節のインデックス
+        let rankingMode = 'today'; // 'today' or 'total'
+
+        // ローカルストレージからデータを読み込み
+        function loadData() {
+            const saved = localStorage.getItem('tleague-sections');
+            if (saved) {
+                sections = JSON.parse(saved);
+                if (sections.length === 0) {
+                    // 初回は第1節を作成
+                    sections.push({ games: [] });
+                }
+                currentSectionIndex = sections.length - 1; // 最新の節を表示
+            } else {
+                // 初回は第1節を作成
+                sections = [{ games: [] }];
+                currentSectionIndex = 0;
+            }
+            updateRanking();
+            updateHistory();
+        }
+
+        // ローカルストレージにデータを保存
+        function saveData() {
+            localStorage.setItem('tleague-sections', JSON.stringify(sections));
+        }
+
+        // ポイント計算関数
+        function calculatePoints(scores, yakumanFlags, tobashiFlags, tobiFlags) {
+            // 40000を引いて1000で割る
+            const basePoints = scores.map(score => (score - 40000) / 1000);
+            
+            // ポイントとインデックスをペアにして保存
+            const pointsWithIndex = basePoints.map((point, index) => ({ point, index, score: scores[index] }));
+            
+            // ポイントで降順ソート（高い順）
+            pointsWithIndex.sort((a, b) => b.point - a.point);
+            
+            const finalPoints = [0, 0, 0];
+            
+            const firstPoint = pointsWithIndex[0].point;
+            const secondPoint = pointsWithIndex[1].point;
+            const thirdPoint = pointsWithIndex[2].point;
+            
+            const firstIndex = pointsWithIndex[0].index;
+            const secondIndex = pointsWithIndex[1].index;
+            const thirdIndex = pointsWithIndex[2].index;
+            
+            // 2位と3位が同点の場合
+            if (secondPoint === thirdPoint) {
+                // 3位のペナルティ-10を2人で分割 → -5ずつ
+                finalPoints[secondIndex] = secondPoint - 5;
+                finalPoints[thirdIndex] = thirdPoint - 5;
+                
+                // 1位は2位と3位の合計の逆数
+                finalPoints[firstIndex] = -(finalPoints[secondIndex] + finalPoints[thirdIndex]);
+                
+            } else {
+                // 通常の処理
+                finalPoints[firstIndex] = firstPoint;
+                finalPoints[secondIndex] = secondPoint;
+                finalPoints[thirdIndex] = thirdPoint - 10; // 3着は-10
+                
+                // 1位は2位と3位の合計の逆数（0になるように）
+                finalPoints[firstIndex] = -(finalPoints[secondIndex] + finalPoints[thirdIndex]);
+            }
+            
+            // 飛びの処理
+            const tobiCount = tobiFlags.filter(x => x).length;
+            tobiFlags.forEach((isTobi, index) => {
+                if (isTobi) {
+                    // 飛ばされた人は-10
+                    finalPoints[index] -= 10;
+                }
+            });
+            
+            // 飛ばしの処理
+            const tobashiCount = tobashiFlags.filter(x => x).length;
+            if (tobashiCount > 0 && tobiCount > 0) {
+                const bonusPerTobashi = (tobiCount * 10) / tobashiCount;
+                tobashiFlags.forEach((isTobashi, index) => {
+                    if (isTobashi) {
+                        // 飛ばしボーナスを分配
+                        finalPoints[index] += bonusPerTobashi;
+                    }
+                });
+            }
+            
+            // 役満の処理
+            yakumanFlags.forEach((hasYakuman, index) => {
+                if (hasYakuman) {
+                    // 役満を上がった人に+40
+                    finalPoints[index] += 40;
+                    // 残りの二人から-20ずつ
+                    for (let i = 0; i < 3; i++) {
+                        if (i !== index) {
+                            finalPoints[i] -= 20;
+                        }
+                    }
+                }
+            });
+            
+            return finalPoints;
+        }
+
+        // 対局を追加
+        function addGame() {
+            const score1 = parseInt(document.getElementById('score1').value);
+            const score2 = parseInt(document.getElementById('score2').value);
+            const score3 = parseInt(document.getElementById('score3').value);
+
+            if (isNaN(score1) || isNaN(score2) || isNaN(score3)) {
+                alert('すべての点数を入力してください');
+                return;
+            }
+
+            const scores = [score1, score2, score3];
+            const yakumanFlags = [
+                document.getElementById('yakuman1').checked,
+                document.getElementById('yakuman2').checked,
+                document.getElementById('yakuman3').checked
+            ];
+            const tobashiFlags = [
+                document.getElementById('tobashi1').checked,
+                document.getElementById('tobashi2').checked,
+                document.getElementById('tobashi3').checked
+            ];
+            const tobiFlags = [
+                document.getElementById('tobi1').checked,
+                document.getElementById('tobi2').checked,
+                document.getElementById('tobi3').checked
+            ];
+            
+            const points = calculatePoints(scores, yakumanFlags, tobashiFlags, tobiFlags);
+
+            const gameData = {
+                scores: scores,
+                points: points,
+                yakumanFlags: yakumanFlags,
+                tobashiFlags: tobashiFlags,
+                tobiFlags: tobiFlags,
+                timestamp: Date.now()
+            };
+
+            // 最新の節に追加
+            if (sections.length === 0) {
+                sections.push({ games: [] });
+            }
+            sections[sections.length - 1].games.push(gameData);
+            
+            saveData();
+            
+            // 最新の節を表示
+            currentSectionIndex = sections.length - 1;
+            
+            updateRanking();
+            updateHistory();
+
+            // 入力フィールドをクリア
+            document.getElementById('score1').value = '';
+            document.getElementById('score2').value = '';
+            document.getElementById('score3').value = '';
+            document.getElementById('yakuman1').checked = false;
+            document.getElementById('yakuman2').checked = false;
+            document.getElementById('yakuman3').checked = false;
+            document.getElementById('tobashi1').checked = false;
+            document.getElementById('tobashi2').checked = false;
+            document.getElementById('tobashi3').checked = false;
+            document.getElementById('tobi1').checked = false;
+            document.getElementById('tobi2').checked = false;
+            document.getElementById('tobi3').checked = false;
+        }
+
+        // 対局を削除
+        function deleteGame(sectionIndex, gameIndex) {
+            if (confirm('この対局を削除しますか？')) {
+                sections[sectionIndex].games.splice(gameIndex, 1);
+                
+                // 節が空になった場合、節自体を削除（ただし最後の節は残す）
+                if (sections[sectionIndex].games.length === 0 && sections.length > 1) {
+                    sections.splice(sectionIndex, 1);
+                    // 表示中の節のインデックスを調整
+                    if (currentSectionIndex >= sections.length) {
+                        currentSectionIndex = sections.length - 1;
+                    }
+                }
+                
+                saveData();
+                updateRanking();
+                updateHistory();
+            }
+        }
+
+        // 新しい節を追加
+        function addNewSection() {
+            if (confirm('新しい節を作成しますか？')) {
+                sections.push({ games: [] });
+                currentSectionIndex = sections.length - 1;
+                saveData();
+                updateHistory();
+            }
+        }
+
+        // 順位表タブの切り替え
+        function switchRankingTab(mode) {
+            rankingMode = mode;
+            
+            // タブのアクティブ状態を更新
+            const tabs = document.querySelectorAll('.ranking-tab');
+            tabs.forEach(tab => {
+                if ((mode === 'today' && tab.textContent === '本日') ||
+                    (mode === 'total' && tab.textContent === '全体')) {
+                    tab.classList.add('active');
+                } else {
+                    tab.classList.remove('active');
+                }
+            });
+            
+            updateRanking();
+        }
+
+        // 順位表を更新
+        function updateRanking() {
+            const totalPoints = [0, 0, 0];
+            
+            if (rankingMode === 'today') {
+                // 本日：最新の節のみ
+                if (sections.length > 0) {
+                    const currentSection = sections[sections.length - 1];
+                    currentSection.games.forEach(game => {
+                        game.points.forEach((point, index) => {
+                            totalPoints[index] += point;
+                        });
+                    });
+                }
+            } else {
+                // 全体：全ての節
+                sections.forEach(section => {
+                    section.games.forEach(game => {
+                        game.points.forEach((point, index) => {
+                            totalPoints[index] += point;
+                        });
+                    });
+                });
+            }
+
+            // 順位を決定
+            const ranking = totalPoints.map((points, index) => ({
+                name: players[index],
+                points: points,
+                index: index
+            }));
+
+            ranking.sort((a, b) => b.points - a.points);
+
+            // 順位表を表示
+            const rankingList = document.getElementById('rankingList');
+            rankingList.innerHTML = '';
+
+            ranking.forEach((player, rank) => {
+                const rankClass = rank === 0 ? 'first' : rank === 1 ? 'second' : 'third';
+                const item = document.createElement('div');
+                item.className = `ranking-item ${rankClass}`;
+                item.innerHTML = `
+                    <span class="rank-number">${rank + 1}位</span>
+                    <span class="player-name">${player.name}</span>
+                    <span class="player-points">${player.points > 0 ? '+' : ''}${player.points}</span>
+                `;
+                rankingList.appendChild(item);
+            });
+        }
+
+        // 履歴を更新
+        function updateHistory() {
+            const historyList = document.getElementById('historyList');
+            const tabsContainer = document.getElementById('tabsContainer');
+            
+            historyList.innerHTML = '';
+            tabsContainer.innerHTML = '';
+
+            if (sections.length === 0) {
+                historyList.innerHTML = '<tr><td colspan="5" style="padding: 20px; color: #666;">まだ対局がありません</td></tr>';
+                return;
+            }
+
+            // タブを生成
+            sections.forEach((section, index) => {
+                const tab = document.createElement('div');
+                tab.className = `tab ${index === currentSectionIndex ? 'active' : ''}`;
+                tab.textContent = `第${index + 1}節`;
+                tab.onclick = () => {
+                    currentSectionIndex = index;
+                    updateHistory();
+                };
+                tabsContainer.appendChild(tab);
+            });
+
+            // 新しい節を追加するボタン
+            const addBtn = document.createElement('button');
+            addBtn.className = 'add-section-btn';
+            addBtn.textContent = '+ 新しい節';
+            addBtn.onclick = addNewSection;
+            tabsContainer.appendChild(addBtn);
+
+            // 現在の節の対局を取得
+            const currentSection = sections[currentSectionIndex];
+            
+            if (!currentSection || currentSection.games.length === 0) {
+                historyList.innerHTML = '<tr><td colspan="5" style="padding: 20px; color: #666;">この節にはまだ対局がありません</td></tr>';
+                return;
+            }
+
+            // 表の行を生成
+            currentSection.games.forEach((game, gameIndex) => {
+                const row = document.createElement('tr');
+                
+                // 半荘番号
+                const gameNumCell = document.createElement('td');
+                gameNumCell.textContent = `${gameIndex + 1}回戦`;
+                gameNumCell.style.fontWeight = 'bold';
+                row.appendChild(gameNumCell);
+
+                // 各プレイヤーの情報
+                players.forEach((name, playerIndex) => {
+                    const cell = document.createElement('td');
+                    const yakumanBadge = game.yakumanFlags && game.yakumanFlags[playerIndex] 
+                        ? '<div class="yakuman-badge">役満</div>' 
+                        : '';
+                    const tobashiBadge = game.tobashiFlags && game.tobashiFlags[playerIndex]
+                        ? '<div class="tobashi-badge">飛ばし</div>'
+                        : '';
+                    const tobiBadge = game.tobiFlags && game.tobiFlags[playerIndex]
+                        ? '<div class="tobi-badge">飛び</div>'
+                        : '';
+                    
+                    cell.innerHTML = `
+                        <div class="player-cell">
+                            <div class="player-score">${game.scores[playerIndex]}点</div>
+                            <div class="player-point">${game.points[playerIndex] > 0 ? '+' : ''}${game.points[playerIndex]}</div>
+                            ${yakumanBadge}
+                            ${tobashiBadge}
+                            ${tobiBadge}
+                        </div>
+                    `;
+                    row.appendChild(cell);
+                });
+
+                // 削除ボタン
+                const actionCell = document.createElement('td');
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'delete-btn';
+                deleteBtn.textContent = '削除';
+                deleteBtn.onclick = () => deleteGame(currentSectionIndex, gameIndex);
+                actionCell.appendChild(deleteBtn);
+                row.appendChild(actionCell);
+
+                historyList.appendChild(row);
+            });
+        }
+
+        // ページ読み込み時にデータを読み込む
+        window.addEventListener('DOMContentLoaded', loadData);
+    </script>
+</body>
+</html>
