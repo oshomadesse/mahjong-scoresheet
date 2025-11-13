@@ -323,6 +323,9 @@
             align-items: center !important;
             gap: 6px !important;
             padding: 0 !important;
+            white-space: normal !important;
+        }
+
         }
 
         .yakuman-badge {
@@ -932,8 +935,7 @@
                 
                 // 編集ボタン
                 const editBtn = document.createElement('button');
-                editBtn.className = 'delete-btn';
-                editBtn.style.background = '#2d5016';
+                editBtn.className = 'edit-btn';
                 editBtn.textContent = '編集';
                 editBtn.onclick = () => editGame(currentSectionIndex, gameIndex);
                 actionCell.appendChild(editBtn);
@@ -985,10 +987,15 @@
         `;
 
         players.forEach((name, i) => {
-            html += `<tr><td>${shortNames}</td><td>${final[i]}</td></tr>`;
+            html += `<tr><td>${shortNames[i]}</td><td>${final[i]}</td></tr>`;
         });
 
-        html += `</tbody></table><br>`;
+
+        html += `
+                </tbody>
+            </table>
+            <br>
+        `;
 
         // --- 送金計算（支払い者とのみ清算） ---
         const payerIndex = parseInt(document.getElementById("payer").value, 10);
@@ -1024,5 +1031,3 @@
     </script>
 </body>
 </html>
-
-
