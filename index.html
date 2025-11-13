@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tリーグ</title>
+    <title>麻雀スコアシート</title>
     <style>
         * {
             margin: 0;
@@ -368,7 +368,8 @@
 </head>
 <body>
     <div class="container">
-        <h1>🀄 Tリーグ 🀄</h1>
+        <h1>🀄 麻雀スコアシート 🀄</h1>
+        <h2 style="text-align:center; color:#2d5016; margin-bottom:15px; font-size:16px;">〜 Tリーグ 〜</h2>
 
         <!-- 順位表 -->
         <div class="section">
@@ -462,11 +463,35 @@
                 </table>
             </div>
         </div>
+
+        <!-- 最終ポイント -->
+        <div class="section">
+            <h3 class="section-title">💰 最終ポイント計算</h3>
+            
+            <div class="input-grid">
+                <div class="input-item">
+                    <label>場代（円）</label>
+                    <input type="number" id="tableFee" placeholder="例：6000">
+                </div>
+
+            <div class="input-item">
+                <label>支払い者</label>
+                <select id="payer" style="padding:10px; border:2px solid #2d5016; border-radius:8px;">
+                    <option value="0">🦎ジェッツ西方🦎</option>
+                    <option value="1">🐺ビースト高橋🐺</option>
+                    <option value="2">🥊ファイト大田🥊</option>
+                </select>
+            </div>
+        </div>
+
+        <button class="btn" onclick="calcFinalPoints()">チェック</button>
+
+        <div id="finalPointsResult" style="margin-top:15px;"></div>
     </div>
 
     <!-- JavaScript -->
     <script>
-        const players = ['ジェッツ西方', 'ビースト高橋', 'ファイト大田'];
+        const players = ['🦎ジェッツ西方🦎', '🐺ビースト高橋🐺', '🥊ファイト大田🥊'];
         let sections = []; // 節ごとのデータ [{games: [...]}]
         let currentSectionIndex = 0; // 現在表示中の節のインデックス
         let rankingMode = 'today'; // 'today' or 'total'
@@ -828,11 +853,82 @@
             });
         }
 
+        //最終ロジック
+        function calcFinalPoints() {
+            const fee = parseInt(document.getElementById("tableFee").value);
+            if (isNaN(fee) || fee <= 0) {
+                alert("場代を入力してください");
+                return;
+            }
+            const payer = parseInt(document.getElementById("payer").value);
+            
+        // 最新の節の合計ポイント取得
+            const total = [0,0,0];
+            const sec = sections[sections.length - 1];
+            
+            sec.games.forEach(g=>{
+                g.points.forEach((p,i)=> total[i] += p);
+            });
+        
+        // 各者 ×50
+            const moneyPoints = total.map(x => x * 50);
+            
+        // 場代 / 3（四捨五入）
+            const feeShare = Math.round(fee / 3);
+            
+        // 支払い者以外は + feeShare、支払い者は計算後に調整だけ表示
+            const after = moneyPoints.map((p,i)=>
+                i === payer ? p : p + feeShare
+            );
+       
+        // 支払い者が受け取るべき金額を計算
+            const payerReceive = moneyPoints[payer] - (moneyPoints[payer] - feeShare * 2);
+        
+        // 結果表示
+        let html = `
+            <table class="history-table">
+                <thead>
+                    <tr>
+                        <th>プレイヤー</th>
+                        <th>精算ポイント</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+        
+        players.forEach((name,i)=>{
+            html += `
+                <tr>
+                    <td>${name}</td>
+                    <td>${after[i]}</td>
+                </tr>
+            `;
+        });
+
+        html += `</tbody></table><br>`;
+
+        // 結果表示
+        html += `<div style="font-weight:bold; font-size:15px; color:#c41e3a;">`;
+
+        players.forEach((name,i)=>{
+            if (i !== payer) {
+                const move = (after[i] - moneyPoints[i]);
+                html += `${name} ➡️ ${players[payer]} に ${move} pt<br>`;
+            }
+        });
+
+        html += `</div>`;
+
+        document.getElementById("finalPointsResult").innerHTML = html;
+    }
+
+        
         // ページ読み込み時にデータを読み込む
         window.addEventListener('DOMContentLoaded', loadData);
     </script>
 </body>
 </html>
+
 
 
 
