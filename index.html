@@ -427,6 +427,52 @@
         .action-cell button:active {
             transform: scale(0.95);
         }
+
+        .paypay-block {
+            margin-top: 20px;
+            padding: 18px;
+            border-radius: 16px;
+            background: #ff0033;
+            color: #fff;
+            text-align: center;
+            display: none;
+            gap: 12px;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .paypay-block__title {
+            margin: 0 0 6px;
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+        }
+
+        .paypay-button {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.18);
+            color: #fff;
+            text-decoration: none;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            border: 2px solid rgba(255, 255, 255, 0.35);
+            transition: background 0.2s ease;
+        }
+
+        .paypay-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .paypay-button--disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+            text-decoration: none;
+        }
     </style>
 </head>
 <body>
@@ -624,6 +670,7 @@
             </div>
         <button class="btn" onclick="calcFinalPoints()">チェック</button>
         <div id="finalPointsResult" style="margin-top:15px;"></div>
+        <div id="paypayLinkBlock" class="paypay-block" aria-live="polite"></div>
         </div>
     </div>
 
@@ -1180,6 +1227,60 @@
             html += `</div>`;
 
             document.getElementById("finalPointsResult").innerHTML = html;
+            updatePayPayBlock(transactions);
+        }
+        
+        function updatePayPayBlock(transactions) {
+            const block = document.getElementById("paypayLinkBlock");
+            if (!block) return;
+
+            if (!transactions.length) {
+                block.innerHTML = "";
+                block.style.display = "none";
+                return;
+            }
+
+            const paypayIds = getPayPayIds();
+            const content = transactions.map((tx, idx) => {
+                const recipientId = resolvePlayerId(tx.to, paypayIds);
+                const link = recipientId ? buildPayPayLink(recipientId, tx.amount) : null;
+                const label = `${tx.from} ➡ ${tx.to} へ ${tx.amount.toLocaleString()} pt 送ポイント`;
+                if (link) {
+                    return `<a class="paypay-button" href="${link}" target="_blank" rel="noopener noreferrer">${label} / PayPayを開く</a>`;
+                }
+                return `<span class="paypay-button paypay-button--disabled" title="PayPay ID未設定">${label}</span>`;
+            }).join("");
+
+            block.innerHTML = `
+                <p class="paypay-block__title">PayPayを開いて送ポイント</p>
+                ${content}
+            `;
+            block.style.display = "flex";
+        }
+
+        function getPayPayIds() {
+            const config = window.MAHJONG_SCORE_CONFIG || window.PAYPAY_IDS || {};
+            return [
+                config.nishikataId || "",
+                config.takahashiId || "",
+                config.otaId || ""
+            ];
+        }
+
+        function resolvePlayerId(displayName, idList) {
+            if (!displayName) return "";
+            if (displayName.includes("西方")) return idList[0];
+            if (displayName.includes("高橋")) return idList[1];
+            if (displayName.includes("大田")) return idList[2];
+            return "";
+        }
+
+        function buildPayPayLink(payPayId, amount) {
+            const safeAmount = Math.max(0, Math.round(amount));
+            if (!payPayId || !safeAmount) return "";
+            const encodedId = encodeURIComponent(payPayId);
+            const encodedAmount = encodeURIComponent(safeAmount);
+            return `paypay://wallet/send?recipientPayPayId=${encodedId}&amount=${encodedAmount}`;
         }
         
         // ページ読み込み時にデータを読み込む
