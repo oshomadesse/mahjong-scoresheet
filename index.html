@@ -1256,129 +1256,60 @@
             
             // --- 送ポイント計算の表示 ---
             html += `<div style="text-align:center; font-size:16px; color:#2d5016; line-height:2.2; margin-top:10px; padding:15px; background:white; border-radius:8px; border:2px solid #2d5016;">`;
-            
+
             if (transactions.length === 0) {
                 html += `<span style="color:#666;">送ポイントの必要はありません</span>`;
             } else {
                 transactions.forEach((tx, index) => {
-                    const txId = `tx-${index}`;
                     html += `
-                        <div style="margin-bottom: 20px; padding: 15px; background: #f9f9f9; border-radius: 8px; border: 2px solid #e0e0e0;">
+                        <div style="
+                            margin-bottom: 20px;
+                            padding: 15px;
+                            background: #f9f9f9;
+                            border-radius: 8px;
+                            border: 2px solid #e0e0e0;
+                        ">
                             <div style="margin-bottom: 8px; font-weight: bold;">${tx.from} ➡️ ${tx.to}</div>
-                            <div style="color:#c41e3a; font-weight:bold; font-size:22px; margin-bottom: 10px;">${tx.amount} pt</div>
+                            <div style="color:#c41e3a; font-weight:bold; font-size:22px; margin-bottom: 10px;">
+                                ${tx.amount} pt
+                            </div>
+                        </div>
                     `;
-                    
-                    // PayPay IDがある場合のみ表示
-                    if (tx.toPayPayId) {
-                        html += `
-                            <div style="margin-bottom: 10px;">
-                                <span class="paypay-id">PayPay ID: ${tx.toPayPayId}</span>
-                            </div>
-                            <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
-                                <button onclick="openPayPay()" style="
-                                    background: linear-gradient(135deg, #ff4757 0%, #d63447 100%);
-                                    color: white;
-                                    border: none;
-                                    padding: 10px 20px;
-                                    border-radius: 6px;
-                                    font-size: 14px;
-                                    font-weight: bold;
-                                    cursor: pointer;
-                                    transition: all 0.3s ease;
-                                ">
-                                    💳 PayPayで送ポイント
-                                </button>
-                                <button onclick="copyPayPayId('${tx.toPayPayId}', '${tx.amount}')" style="
-                                    background: white;
-                                    color: #2d5016;
-                                    border: 2px solid #2d5016;
-                                    padding: 10px 20px;
-                                    border-radius: 6px;
-                                    font-size: 14px;
-                                    font-weight: bold;
-                                    cursor: pointer;
-                                    transition: all 0.3s ease;
-                                ">
-                                    📋 IDをコピー
-                                </button>
-                            </div>
-                        `;
-                    }
-                    
-                    html += `</div>`;
                 });
             }
-            
+
             html += `</div>`;
 
+            // HTMLを反映
             document.getElementById("finalPointsResult").innerHTML = html;
-        }
-        
-        // PayPayアプリを開く関数
-        function openPayPay() {
-            // iOSまたはAndroidの判定
-            const userAgent = navigator.userAgent.toLowerCase();
-            const isIOS = /iphone|ipad|ipod/.test(userAgent);
-            const isAndroid = /android/.test(userAgent);
-            
-            // PayPayアプリを開く（ディープリンク）
-            // 実際の送金画面は開けないので、アプリのトップを開く
-            const paypayUrl = 'paypay://';
-            
-            // まずPayPayアプリを開くことを試みる
-            window.location.href = paypayUrl;
-            
-            // アプリがインストールされていない場合はストアへ誘導
-            setTimeout(() => {
-                if (isIOS) {
-                    window.location.href = 'https://apps.apple.com/jp/app/paypay/id1435783608';
-                } else if (isAndroid) {
-                    window.location.href = 'https://play.google.com/store/apps/details?id=jp.ne.paypay.android.app';
-                } else {
-                    alert('PayPayアプリをスマートフォンで開いてください。');
-                }
-            }, 1500);
-        }
-        
-        // PayPay IDをコピーする関数
-        function copyPayPayId(paypayId, amount) {
-            const text = `PayPay ID: ${paypayId}\n金額: ${amount}円`;
-            
-            // クリップボードにコピー
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(text).then(() => {
-                    alert(`コピーしました！\n\n${text}\n\nPayPayアプリで送ポイントしてください。`);
-                }).catch(err => {
-                    console.error('コピー失敗:', err);
-                    fallbackCopy(text);
-                });
-            } else {
-                fallbackCopy(text);
-            }
-        }
-        
-        // フォールバック: 古いブラウザ用のコピー機能
-        function fallbackCopy(text) {
-            const textarea = document.createElement('textarea');
-            textarea.value = text;
-            textarea.style.position = 'fixed';
-            textarea.style.opacity = '0';
-            document.body.appendChild(textarea);
-            textarea.select();
-            
-            try {
-                document.execCommand('copy');
-                alert(`コピーしました！\n\n${text}\n\nPayPayアプリで送ポイントしてください。`);
-            } catch (err) {
-                console.error('コピー失敗:', err);
-                alert(`手動でコピーしてください:\n\n${text}`);
-            }
-            
-            document.body.removeChild(textarea);
-        }
-        
+
+            // ★★ PayPayボタンを表示（固定・簡易版）★★
+            document.getElementById("finalPointsResult").insertAdjacentHTML(
+                "afterend",
+                `
+                <div style="margin-top:20px;">
+                <a href="paypay://"
+                    style="
+                        display:block;
+                        width:100%;
+                        background:#FF0033;
+                        color:white;
+                        text-align:center;
+                        padding:15px 0;
+                        border-radius:10px;
+                        font-size:18px;
+                        font-weight:bold;
+                        text-decoration:none;
+                    ">
+                    PayPayを開く
+                </a>
+            </div>
+            `
+        );
+
         // ページ読み込み時にデータを読み込む
         window.addEventListener('DOMContentLoaded', loadData);
     </script>
 </body>
 </html>
+
