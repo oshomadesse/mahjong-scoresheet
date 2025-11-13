@@ -378,9 +378,9 @@
         /* 半荘列（改行なし＆小さく固定） */
         .history-table th:nth-child(1),
         .history-table td:nth-child(1) {
-            width: 45px !important;
-            min-width: 45px !important;
-            max-width: 45px !important;
+            width: 35px !important;
+            min-width: 35px !important;
+            max-width: 35px !important;
         }
         
         /* プレイヤー3列（均等幅で改行なし） */
@@ -390,36 +390,28 @@
         .history-table td:nth-child(2),
         .history-table td:nth-child(3),
         .history-table td:nth-child(4) {
-            width: 95px !important;
-            min-width: 95px !important;
-            max-width: 95px !important;
+            width: 80px !important;
+            min-width: 80px !important;
+            max-width: 80px !important;
         }
         
         /* 操作列（細い列幅で固定） */
         .history-table th:nth-child(5),
         .history-table td:nth-child(5) {
-            width: 50px !important;
-            min-width: 50px !important;
-            max-width: 50px !important;
+            width: auto !important;
+            min-width: 40px !important;
             padding: 0 !important;
         }
         
         /* 操作セル内のボタン（縦並び＋余白あり＋小型化） */
-        .action-cell {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 6px;
-            padding: 0 !important;
-        }
-        
-        /* 40px のミニボタンに統一して列幅を抑える *
         .action-cell button {
+            display: block !important;   /* ← これが縦積みの決定打 */
             width: 40px !important;
-            height: 22px;
+            height: 22px !important;
             padding: 0 !important;
             font-size: 10px !important;
-            line-height: 22px;
+            line-height: 22px !important;
+            margin: 0 !important;
         }
     </style>
 </head>
@@ -1035,6 +1027,7 @@
     </script>
 </body>
 </html>
+
 
 
 
