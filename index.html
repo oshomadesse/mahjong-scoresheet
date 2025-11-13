@@ -359,7 +359,7 @@
             font-weight: bold;
         }
 
-        /* ==== 対局履歴テーブル：スマホ最適化（iPhone13 mini 完全対応） ==== */
+        /* ==== 対局履歴テーブル:スマホ最適化(iPhone13 mini 完全対応) ==== */
         /* 改行禁止＋余白を詰める */
         .history-table th,
         .history-table td {
@@ -373,7 +373,7 @@
             width: 100%;
         }
         
-        /* 半荘列（改行なし＆小さく固定） */
+        /* 半荘列(改行なし＆小さく固定) */
         .history-table th:nth-child(1),
         .history-table td:nth-child(1) {
             width: 30px !important;
@@ -381,7 +381,7 @@
             max-width: 30px !important;
         }
         
-        /* プレイヤー3列（均等幅で改行なし） */
+        /* プレイヤー3列(均等幅で改行なし) */
         .history-table th:nth-child(2),
         .history-table th:nth-child(3),
         .history-table th:nth-child(4),
@@ -393,7 +393,7 @@
             max-width: 70px !important;
         }
         
-        /* 操作列（細い列幅で固定） */
+        /* 操作列(細い列幅で固定) */
         .history-table th:nth-child(5),
         .history-table td:nth-child(5) {
             width: auto !important;
@@ -401,7 +401,7 @@
             padding: 8px 4px !important;
         }
         
-        /* 操作セル内のボタン（縦並び＋余白あり＋小型化） */
+        /* 操作セル内のボタン(縦並び＋余白あり＋小型化) */
         .action-cell button {
             display: block !important;   /* ← これが縦積みの決定打 */
             width: 40px !important;
@@ -427,6 +427,24 @@
         .action-cell button:active {
             transform: scale(0.95);
         }
+
+        /* PayPay IDのスタイル */
+        .paypay-id {
+            font-size: 12px;
+            color: #666;
+            font-family: 'Courier New', monospace;
+            margin-top: 3px;
+        }
+
+        /* ボタンのホバー効果用のクラス */
+        button:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
     </style>
 </head>
 <body>
@@ -448,10 +466,10 @@
     <script>
         // パスワード認証チェック
         const PASSWORD = 'kicha2714';
-        const AUTH_DURATION = 2 * 60 * 60 * 1000; // 2時間（ミリ秒）
+        const AUTH_DURATION = 2 * 60 * 60 * 1000; // 2時間(ミリ秒)
         
         function checkAuth() {
-            const authData = sessionStorage.getItem('mahjong-auth');
+            const authData = localStorage.getItem('mahjong-auth');
             if (!authData) return false;
             
             try {
@@ -459,8 +477,6 @@
                 const now = Date.now();
                 // 2時間以内ならOK
                 if (now - timestamp < AUTH_DURATION) {
-                    // アクセス時刻を更新（このタブを開いている限り有効に保つ）
-                    updateAuthTimestamp();
                     return true;
                 }
             } catch (e) {
@@ -610,7 +626,7 @@
             <div class="input-grid">
                 <div class="input-item">
                     <label>ゲーム代</label>
-                    <input type="number" id="tableFee" placeholder="例：6000">
+                    <input type="number" id="tableFee" placeholder="例:6000">
                 </div>
 
             <div class="input-item">
@@ -632,8 +648,8 @@
         const players = ['🦎ジェッツ西方🦎', '🐺ビースト高橋🐺', '🥊ファイト大田🥊'];
         const shortNames = players.map(p => {
             const chars = Array.from(p);  // 絵文字を正しく扱うために配列化
-            const emojiStart = chars[0];   // 最初の文字（絵文字）
-            const emojiEnd = chars[chars.length - 1];   // 最後の文字（絵文字）
+            const emojiStart = chars[0];   // 最初の文字(絵文字)
+            const emojiEnd = chars[chars.length - 1];   // 最後の文字(絵文字)
             const name = p.replace(/.*(西方|高橋|大田).*/, "$1"); // 名字抽出
             return `${emojiStart}${name}${emojiEnd}`;
         });
@@ -674,7 +690,7 @@
             // ポイントとインデックスをペアにして保存
             const pointsWithIndex = basePoints.map((point, index) => ({ point, index, score: scores[index] }));
             
-            // ポイントで降順ソート（高い順）
+            // ポイントで降順ソート(高い順)
             pointsWithIndex.sort((a, b) => b.point - a.point);
             
             const finalPoints = [0, 0, 0];
@@ -702,7 +718,7 @@
                 finalPoints[secondIndex] = secondPoint;
                 finalPoints[thirdIndex] = thirdPoint - 10; // 3着は-10
                 
-                // 1位は2位と3位の合計の逆数（0になるように）
+                // 1位は2位と3位の合計の逆数(0になるように)
                 finalPoints[firstIndex] = -(finalPoints[secondIndex] + finalPoints[thirdIndex]);
             }
             
@@ -758,7 +774,7 @@
             // 合計105000チェック
             const sum = score1 + score2 + score3;
             if (sum !== 105000) {
-                alert(`3人の点数の合計が 105000 ではありません（現在: ${sum}）`);
+                alert(`3人の点数の合計が 105000 ではありません(現在: ${sum})`);
                 return;
             }
 
@@ -785,7 +801,7 @@
             const tobiCount = tobiFlags.filter(x => x).length;
             
             if (tobashiCount !== tobiCount) {
-                alert(`「飛ばし」と「飛び」は1対1で対応させる必要があります\n現在：飛ばし ${tobashiCount}人、飛び ${tobiCount}人`);
+                alert(`「飛ばし」と「飛び」は1対1で対応させる必要があります\n現在:飛ばし ${tobashiCount}人、飛び ${tobiCount}人`);
                 return;
             }
             
@@ -831,7 +847,7 @@
 
         // 対局を削除
         function deleteGame(sectionIndex, gameIndex) {
-            if (confirm('この対局を削除しますか？')) {
+            if (confirm('この対局を削除しますか?')) {
                 sections[sectionIndex].games.splice(gameIndex, 1);
                 
                 if (sections[sectionIndex].games.length === 0 && sections.length > 1) {
@@ -880,7 +896,7 @@
 
         // 新しい節を追加
         function addNewSection() {
-            if (confirm('新しい節を作成しますか？')) {
+            if (confirm('新しい節を作成しますか?')) {
                 sections.push({ games: [] });
                 currentSectionIndex = sections.length - 1;
                 saveData();
@@ -911,7 +927,7 @@
             const totalPoints = [0, 0, 0];
             
             if (rankingMode === 'today') {
-                // 本日：最新の節のみ
+                // 本日:最新の節のみ
                 if (sections.length > 0) {
                     const currentSection = sections[sections.length - 1];
                     currentSection.games.forEach(game => {
@@ -921,7 +937,7 @@
                     });
                 }
             } else {
-                // 全体：全ての節
+                // 全体:全ての節
                 sections.forEach(section => {
                     section.games.forEach(game => {
                         game.points.forEach((point, index) => {
@@ -1032,7 +1048,7 @@
                     row.appendChild(cell);
                 });
 
-                // 操作セル（重要：classNameを設定）
+                // 操作セル(重要:classNameを設定)
                 const actionCell = document.createElement('td');
                 actionCell.className = 'action-cell';
                 
@@ -1053,13 +1069,82 @@
             });
         }
 
-        //最終ロジック（最小送ポイント回数アルゴリズム）
-        function calcFinalPoints() {
+        // PayPay IDを取得する関数
+        async function fetchPayPayIds() {
+            const WORKER_URL = 'https://mahjong-config.oshomadesse.workers.dev';
+            
+            try {
+                // タイムスタンプを生成(ミリ秒)
+                const timestamp = Date.now();
+                
+                // アクセスキーを生成: base64(PASSWORD:timestamp)
+                const accessToken = btoa(`${PASSWORD}:${timestamp}`);
+                
+                console.log('Workerにリクエスト中...', {
+                    url: WORKER_URL,
+                    timestamp: timestamp,
+                    token: accessToken.substring(0, 10) + '...'
+                });
+                
+                // Workerにリクエスト
+                const response = await fetch(WORKER_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-access-token': accessToken  // ヘッダーにトークンを設定
+                    },
+                    body: JSON.stringify({
+                        timestamp: timestamp  // タイムスタンプのみボディに送る
+                    })
+                });
+                
+                console.log('レスポンス受信:', response.status, response.statusText);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Worker error:', response.status, errorText);
+                    throw new Error(`Worker error: ${response.status} - ${errorText}`);
+                }
+                
+                const data = await response.json();
+                console.log('取得したデータ:', data);
+                
+                // Workerのレスポンス形式に合わせて配列に変換
+                return [
+                    data.nishikataId || '',
+                    data.takahashiId || '',
+                    data.otaId || ''
+                ];
+            } catch (error) {
+                console.error('PayPay ID取得エラー詳細:', {
+                    message: error.message,
+                    stack: error.stack,
+                    type: error.name
+                });
+                
+                // CORSエラーの可能性を示唆
+                if (error.message.includes('Failed to fetch')) {
+                    console.error('⚠️ CORS エラーの可能性があります。Cloudflare Workerの設定を確認してください。');
+                    console.error('確認事項:');
+                    console.error('1. Cloudflare Access が無効になっているか');
+                    console.error('2. CORS ヘッダーが正しく設定されているか');
+                }
+                
+                // エラー時は空のIDを返す（エラー表示はしない）
+                return ['', '', ''];
+            }
+        }
+
+        //最終ロジック(最小送ポイント回数アルゴリズム)
+        async function calcFinalPoints() {
             const fee = parseInt(document.getElementById("tableFee").value);
             if (isNaN(fee) || fee <= 0) {
                 alert("ゲーム代を入力してください");
                 return;
             }
+        
+            // PayPay IDを取得
+            const paypayIds = await fetchPayPayIds();
         
             // 最新の節の合計ポイントを取得
             const total = [0, 0, 0];
@@ -1072,10 +1157,10 @@
             // ① 全員 ×50
             const moneyPoints = total.map(x => x * 50);
         
-            // ② ゲーム代を3で割る（四捨五入）
+            // ② ゲーム代を3で割る(四捨五入)
             const feeShare = Math.round(fee / 3);
         
-            // ③ 最終ポイント（ゲーム代負担前）
+            // ③ 最終ポイント(ゲーム代負担前)
             const final = moneyPoints.map(p => p - feeShare);
         
             // 左側のみ絵文字をつけた名前を生成
@@ -1122,6 +1207,7 @@
             const balanceData = balances.map((balance, index) => ({
                 index: index,
                 name: leftEmojiNames[index],
+                paypayId: paypayIds[index] || '',
                 balance: balance
             }));
             
@@ -1130,9 +1216,9 @@
             const workingBalances = balanceData.map(d => ({ ...d }));
             
             while (true) {
-                // 最も債権が多い人（プラスが大きい）
+                // 最も債権が多い人(プラスが大きい)
                 let maxCreditor = null;
-                // 最も負債が多い人（マイナスが大きい）
+                // 最も負債が多い人(マイナスが大きい)
                 let maxDebtor = null;
                 
                 for (const person of workingBalances) {
@@ -1144,7 +1230,7 @@
                     }
                 }
                 
-                // 全員のバランスが0に近ければ終了（誤差1円まで許容）
+                // 全員のバランスが0に近ければ終了(誤差1円まで許容)
                 if (Math.abs(maxCreditor.balance) < 1 && Math.abs(maxDebtor.balance) < 1) {
                     break;
                 }
@@ -1157,7 +1243,9 @@
                 // 送ポイントを記録
                 transactions.push({
                     from: maxDebtor.name,
+                    fromPayPayId: maxDebtor.paypayId,
                     to: maxCreditor.name,
+                    toPayPayId: maxCreditor.paypayId,
                     amount: Math.round(amount)
                 });
                 
@@ -1167,13 +1255,57 @@
             }
             
             // --- 送ポイント計算の表示 ---
-            html += `<div style="text-align:center; font-size:16px; color:#2d5016; line-height:2; margin-top:10px; padding:15px; background:white; border-radius:8px; border:2px solid #2d5016;">`;
+            html += `<div style="text-align:center; font-size:16px; color:#2d5016; line-height:2.2; margin-top:10px; padding:15px; background:white; border-radius:8px; border:2px solid #2d5016;">`;
             
             if (transactions.length === 0) {
                 html += `<span style="color:#666;">送ポイントの必要はありません</span>`;
             } else {
-                transactions.forEach(tx => {
-                    html += `${tx.from} ➡️ ${tx.to} に <span style="color:#c41e3a; font-weight:bold; font-size:18px;">${tx.amount} pt</span><br>`;
+                transactions.forEach((tx, index) => {
+                    const txId = `tx-${index}`;
+                    html += `
+                        <div style="margin-bottom: 20px; padding: 15px; background: #f9f9f9; border-radius: 8px; border: 2px solid #e0e0e0;">
+                            <div style="margin-bottom: 8px; font-weight: bold;">${tx.from} ➡️ ${tx.to}</div>
+                            <div style="color:#c41e3a; font-weight:bold; font-size:22px; margin-bottom: 10px;">${tx.amount} pt</div>
+                    `;
+                    
+                    // PayPay IDがある場合のみ表示
+                    if (tx.toPayPayId) {
+                        html += `
+                            <div style="margin-bottom: 10px;">
+                                <span class="paypay-id">PayPay ID: ${tx.toPayPayId}</span>
+                            </div>
+                            <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
+                                <button onclick="openPayPay()" style="
+                                    background: linear-gradient(135deg, #ff4757 0%, #d63447 100%);
+                                    color: white;
+                                    border: none;
+                                    padding: 10px 20px;
+                                    border-radius: 6px;
+                                    font-size: 14px;
+                                    font-weight: bold;
+                                    cursor: pointer;
+                                    transition: all 0.3s ease;
+                                ">
+                                    💳 PayPayで送ポイント
+                                </button>
+                                <button onclick="copyPayPayId('${tx.toPayPayId}', '${tx.amount}')" style="
+                                    background: white;
+                                    color: #2d5016;
+                                    border: 2px solid #2d5016;
+                                    padding: 10px 20px;
+                                    border-radius: 6px;
+                                    font-size: 14px;
+                                    font-weight: bold;
+                                    cursor: pointer;
+                                    transition: all 0.3s ease;
+                                ">
+                                    📋 IDをコピー
+                                </button>
+                            </div>
+                        `;
+                    }
+                    
+                    html += `</div>`;
                 });
             }
             
@@ -1182,11 +1314,71 @@
             document.getElementById("finalPointsResult").innerHTML = html;
         }
         
+        // PayPayアプリを開く関数
+        function openPayPay() {
+            // iOSまたはAndroidの判定
+            const userAgent = navigator.userAgent.toLowerCase();
+            const isIOS = /iphone|ipad|ipod/.test(userAgent);
+            const isAndroid = /android/.test(userAgent);
+            
+            // PayPayアプリを開く（ディープリンク）
+            // 実際の送金画面は開けないので、アプリのトップを開く
+            const paypayUrl = 'paypay://';
+            
+            // まずPayPayアプリを開くことを試みる
+            window.location.href = paypayUrl;
+            
+            // アプリがインストールされていない場合はストアへ誘導
+            setTimeout(() => {
+                if (isIOS) {
+                    window.location.href = 'https://apps.apple.com/jp/app/paypay/id1435783608';
+                } else if (isAndroid) {
+                    window.location.href = 'https://play.google.com/store/apps/details?id=jp.ne.paypay.android.app';
+                } else {
+                    alert('PayPayアプリをスマートフォンで開いてください。');
+                }
+            }, 1500);
+        }
+        
+        // PayPay IDをコピーする関数
+        function copyPayPayId(paypayId, amount) {
+            const text = `PayPay ID: ${paypayId}\n金額: ${amount}円`;
+            
+            // クリップボードにコピー
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => {
+                    alert(`コピーしました！\n\n${text}\n\nPayPayアプリで送ポイントしてください。`);
+                }).catch(err => {
+                    console.error('コピー失敗:', err);
+                    fallbackCopy(text);
+                });
+            } else {
+                fallbackCopy(text);
+            }
+        }
+        
+        // フォールバック: 古いブラウザ用のコピー機能
+        function fallbackCopy(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            
+            try {
+                document.execCommand('copy');
+                alert(`コピーしました！\n\n${text}\n\nPayPayアプリで送ポイントしてください。`);
+            } catch (err) {
+                console.error('コピー失敗:', err);
+                alert(`手動でコピーしてください:\n\n${text}`);
+            }
+            
+            document.body.removeChild(textarea);
+        }
+        
         // ページ読み込み時にデータを読み込む
         window.addEventListener('DOMContentLoaded', loadData);
     </script>
 </body>
 </html>
-
-
-
