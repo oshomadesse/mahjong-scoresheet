@@ -1179,23 +1179,23 @@
             } else {
                 transactions.forEach(tx => {
                     html += `${tx.from} ➡️ ${tx.to} に <span style="color:#c41e3a; font-weight:bold; font-size:18px;">${tx.amount} pt</span><br>`;
-                    html += `
-                        <a href="paypay://"
-                            style="
-                                display:inline-block;
-                                margin-top:6px;
-                                padding:10px 20px;
-                                background:#FF0033;
-                                color:white;
-                                font-weight:bold;
-                                border-radius:8px;
-                                text-decoration:none;
-                            ">
-                            PayPayを開く
-                        </a>
-                        <br><br>
-                        `;
                     });
+                html += `
+                    <a href="paypay://"
+                        style="
+                            display:inline-block;
+                            margin-top:6px;
+                            padding:5px 20px;
+                            background:#FF0033;
+                            color:white;
+                            font-weight:bold;
+                            border-radius:8px;
+                            text-decoration:none;
+                        ">
+                        PayPayを開く
+                    </a>
+                    <br><br>
+                `;
                 }
             
             html += `</div>`;
@@ -1208,4 +1208,5 @@
     </script>
 </body>
 </html>
+
 
