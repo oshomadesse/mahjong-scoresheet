@@ -369,7 +369,7 @@
 <body>
     <div class="container">
         <h1>🀄 麻雀スコアシート 🀄</h1>
-        <h2 style="text-align:center; color:#2d5016; margin-bottom:15px; font-size:24px;">〜 Tリーグ専用 〜</h2>
+        <h2 style="text-align:center; color:#2d5016; margin-bottom:15px; font-size:18px;">〜 Tリーグ専用 〜</h2>
 
         <!-- 順位表 -->
         <div class="section">
@@ -470,7 +470,7 @@
             
             <div class="input-grid">
                 <div class="input-item">
-                    <label>ゲーム代（円）</label>
+                    <label>ゲーム代</label>
                     <input type="number" id="tableFee" placeholder="例：6000">
                 </div>
 
@@ -483,11 +483,9 @@
                     <option value="2">🥊ファイト大田🥊</option>
                 </select>
             </div>
-        </div>
-
         <button class="btn" onclick="calcFinalPoints()">チェック</button>
-
         <div id="finalPointsResult" style="margin-top:15px;"></div>
+        </div>
     </div>
 
     <!-- JavaScript -->
@@ -878,6 +876,8 @@
                     row.appendChild(cell);
                 });
 
+                const actionCell = document.createElement('td');
+                
                 // 編集ボタン
                 const editBtn = document.createElement('button');
                 editBtn.className = 'delete-btn';
@@ -892,8 +892,8 @@
                 deleteBtn.textContent = '削除';
                 deleteBtn.onclick = () => deleteGame(currentSectionIndex, gameIndex);
                 actionCell.appendChild(deleteBtn);
+                
                 row.appendChild(actionCell);
-
                 historyList.appendChild(row);
             });
         }
@@ -979,3 +979,4 @@
     </script>
 </body>
 </html>
+
