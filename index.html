@@ -1301,7 +1301,7 @@
             // ① 認証セッションの確認（2時間以内ならOK）
             if (!checkAuth()) {
                 // パスワード未入力 or 有効期限切れ → パスワード画面を表示
-                document.getElementById('passwordOverlay').style.display = 'block';
+                document.getElementById('passwordOverlay').style.display = 'flex';
                 document.getElementById('mainContainer').style.display = 'none';
                 return;
             }
@@ -2027,11 +2027,3 @@
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
