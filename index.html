@@ -580,7 +580,7 @@
         .final-points-table td {
             white-space: nowrap;
             text-align: center;
-            vertical-align: middle;
+            vertical-align: middle !important;
         }
 
         
@@ -1658,14 +1658,16 @@
             
             // 合計行を追加
             const totalRow = document.createElement('tr');
-            totalRow.style.fontWeight = 'bold';
-            totalRow.style.backgroundColor = '#e8f5e9';
+            totalRow.style.backgroundColor = '#c41e3a';
             
             // 「合計」セル
             const totalLabelCell = document.createElement('td');
             totalLabelCell.textContent = '合計';
             totalLabelCell.style.fontWeight = 'bold';
             totalLabelCell.style.fontSize = '12px';
+            totalLabelCell.style.color = 'white';
+            totalLabelCell.style.textAlign = 'center';
+            totalLabelCell.style.verticalAlign = 'middle';
             totalRow.appendChild(totalLabelCell);
             
             // 各プレイヤーの合計ポイントを計算
@@ -1678,10 +1680,10 @@
             players.forEach((name, playerIndex) => {
                 const cell = document.createElement('td');
                 cell.style.textAlign = 'center';
+                cell.style.verticalAlign = 'middle';
+                cell.style.color = 'white';
                 cell.innerHTML = `
-                    <div class="player-cell">
-                        <div class="player-point" style="font-weight: bold;">${totalPoints[playerIndex] > 0 ? '+' : ''}${totalPoints[playerIndex]}</div>
-                    </div>
+                    <div style="font-weight: bold; font-size: 13px;">${totalPoints[playerIndex] > 0 ? '+' : ''}${totalPoints[playerIndex]}</div>
                 `;
                 totalRow.appendChild(cell);
             });
