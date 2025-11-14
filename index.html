@@ -54,7 +54,7 @@
         }
         
         .ios-button {
-            background: #007AFF;
+            background: #666666;
             color: white;
             border: none;
             padding: 6px 14px;
@@ -748,7 +748,7 @@
     <!-- カスタムエラーダイアログ -->
     <div id="customAlertOverlay" class="custom-alert-overlay">
         <div class="custom-alert-box">
-            <div class="custom-alert-header">エラー</div>
+            <div class="custom-alert-header" id="customAlertTitle">エラー</div>
             <div class="custom-alert-body" id="customAlertMessage"></div>
             <div class="custom-alert-footer">
                 <button class="custom-alert-button" onclick="closeCustomAlert()">OK</button>
@@ -823,14 +823,35 @@
         </div>
     </div>
 
+    <!-- 新しい節の確認ダイアログ -->
+    <div id="newSectionDialogOverlay" class="custom-alert-overlay">
+        <div class="custom-alert-box">
+            <div class="custom-alert-header">新しい節を作成</div>
+            <div class="custom-alert-body">
+                新しい節を作成しますか？
+            </div>
+            <div class="custom-alert-footer" style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button class="custom-alert-button" style="background: #999;" onclick="closeNewSectionDialog()">キャンセル</button>
+                <button class="custom-alert-button" onclick="confirmNewSection()">作成</button>
+            </div>
+        </div>
+    </div>
+
 
     <script>
         // カスタムエラーダイアログ
-        function showError(message) {
+        function showDialog(message, title = 'エラー') {
             const overlay = document.getElementById('customAlertOverlay');
+            const titleElement = document.getElementById('customAlertTitle');
             const messageElement = document.getElementById('customAlertMessage');
+            titleElement.textContent = title;
             messageElement.textContent = message;
             overlay.style.display = 'flex';
+        }
+        
+        // 後方互換性のため
+        function showError(message) {
+            showDialog(message, 'エラー');
         }
         
         function closeCustomAlert() {
@@ -1621,13 +1642,24 @@
 
 
         // 新しい節を追加
+        // 新しい節を追加（ダイアログ表示）
         function addNewSection() {
-            if (confirm('新しい節を作成しますか？')) {
-                sections.push({ games: [] });
-                currentSectionIndex = sections.length - 1;
-                saveData();
-                updateHistory();
-            }
+            document.getElementById('newSectionDialogOverlay').style.display = 'flex';
+        }
+        
+        // 新しい節の作成を確定
+        function confirmNewSection() {
+            sections.push({ games: [] });
+            currentSectionIndex = sections.length - 1;
+            saveData();
+            updateHistory();
+            closeNewSectionDialog();
+        }
+        
+        // 新しい節ダイアログを閉じる
+        function closeNewSectionDialog() {
+            document.getElementById('newSectionDialogOverlay').style.display = 'none';
+        }
         }
 
         // 順位表タブの切り替え
@@ -1959,6 +1991,30 @@
                     return pt;  // 既にfeeShareが引かれている
                 }
             });
+            // 余り計算と調整
+            const remainder = feeShare * 3 - fee;
+            
+            if (remainder > 0) {
+                // 1位、2位、3位を特定（合計ポイントで判定）
+                const rankings = total.map((pt, idx) => ({pt, idx}))
+                    .sort((a, b) => b.pt - a.pt);
+                
+                const firstIdx = rankings[0].idx;
+                const secondIdx = rankings[1].idx;
+                const thirdIdx = rankings[2].idx;
+                
+                if (remainder === 2) {
+                    // 余り2円：1位が2円多く負担、2位と3位が1円ずつ軽減
+                    balances[firstIdx] -= 2;
+                    balances[secondIdx] += 1;
+                    balances[thirdIdx] += 1;
+                } else if (remainder === 1) {
+                    // 余り1円：1位が1円多く負担、3位が1円軽減
+                    balances[firstIdx] -= 1;
+                    balances[thirdIdx] += 1;
+                }
+            }
+            
             
             // バランスとインデックスを結びつけた配列を作成
             const balanceData = balances.map((balance, index) => ({
@@ -2057,21 +2113,17 @@
         async function refreshData() {
             try {
                 await loadData();
-                showError('最新データを取得しました！');
-                // 2秒後に自動的にダイアログを閉じる
-                setTimeout(() => {
-                    closeCustomAlert();
-                }, 2000);
+                showDialog('最新データを取得しました！', 'データの更新');
             } catch (error) {
                 console.error('データ取得エラー:', error);
-                showError('データの取得に失敗しました');
+                showDialog('データの取得に失敗しました', 'データの更新');
             }
         }
 
         // 現在のデータをスナップショットとして保存
         async function saveSnapshot() {
             if (sections.length === 0) {
-                showError('保存するデータがありません');
+                showDialog('保存するデータがありません', 'データの保存');
                 return;
             }
             
@@ -2109,18 +2161,18 @@
                 });
                 
                 if (res.status === 200) {
-                    showError(`記録を保存しました！\n\n${snapshotName}`);
+                    showDialog(`記録を保存しました！\n\n${snapshotName}`, 'データの保存');
                     // 3秒後に自動的にダイアログを閉じる
                     setTimeout(() => {
                         closeCustomAlert();
                     }, 3000);
                 } else {
                     console.error('保存エラー', res.status);
-                    showError('記録の保存に失敗しました。\n\nWorker側で /mahjong/snapshot エンドポイントを実装してください。');
+                    showDialog('記録の保存に失敗しました。\n\nWorker側で /mahjong/snapshot エンドポイントを実装してください。', 'データの保存');
                 }
             } catch (error) {
                 console.error('保存エラー:', error);
-                showError('記録の保存に失敗しました');
+                showDialog('記録の保存に失敗しました', 'データの保存');
             }
         }
 
