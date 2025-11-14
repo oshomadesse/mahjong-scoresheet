@@ -474,7 +474,6 @@
         }
 
         /* 対局履歴テーブルだけ、プレイヤー3列を上詰め＆180px にする */
-        .history-table:not(.final-points-table) td:nth-child(1),
         .history-table:not(.final-points-table) td:nth-child(2),
         .history-table:not(.final-points-table) td:nth-child(3),
         .history-table:not(.final-points-table) td:nth-child(4),
@@ -727,6 +726,17 @@
         #customAlertOverlay {
             z-index: 30000;
         }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
     </style>
 </head>
 <body>
@@ -838,6 +848,25 @@
     </div>
 
 
+
+    <!-- 保存確認ダイアログ -->
+    <div id="saveConfirmDialogOverlay" class="custom-alert-overlay">
+        <div class="custom-alert-box">
+            <div class="custom-alert-header">データの保存</div>
+            <div class="custom-alert-body">
+                しょーまのデータベースに対戦データを保存しますか？
+            </div>
+            <div class="custom-alert-footer" style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button class="custom-alert-button" style="background: #999;" onclick="closeSaveConfirmDialog()">キャンセル</button>
+                <button class="custom-alert-button" onclick="confirmSaveSnapshot()">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 保存成功ミニポップアップ -->
+    <div id="saveSuccessPopup" style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #4CAF50; color: white; padding: 15px 25px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 50000; display: none; font-weight: bold; font-size: 14px; animation: slideDown 0.3s ease;">
+        <div id="saveSuccessMessage"></div>
+    </div>
     <script>
         // カスタムエラーダイアログ
         function showDialog(message, title = 'エラー') {
@@ -1934,8 +1963,32 @@
             // ② ゲーム代を3で割る（切り上げ）
             const feeShare = Math.ceil(fee / 3);
         
-            // ③ 最終ポイント（ゲーム代負担前）
-            const final = moneyPoints.map(p => p - feeShare);
+            // ③ 余り計算
+            const remainder = feeShare * 3 - fee;
+            
+            // ④ 余りの調整
+            // 1位、2位、3位を特定（合計ポイントで判定）
+            const rankings = total.map((pt, idx) => ({pt, idx}))
+                .sort((a, b) => b.pt - a.pt);
+            
+            const firstIdx = rankings[0].idx;
+            const secondIdx = rankings[1].idx;
+            const thirdIdx = rankings[2].idx;
+            
+            // 余り調整用の配列
+            const remainderAdjust = [0, 0, 0];
+            
+            if (remainder === 2) {
+                // 余り2円：2位と3位が1円ずつ軽減
+                remainderAdjust[secondIdx] = +1;
+                remainderAdjust[thirdIdx] = +1;
+            } else if (remainder === 1) {
+                // 余り1円：3位が1円軽減
+                remainderAdjust[thirdIdx] = +1;
+            }
+            
+            // ⑤ 最終ポイント = ×50 - feeShare + 余り調整
+            const final = moneyPoints.map((p, i) => p - feeShare + remainderAdjust[i]);
         
             // 左側のみ絵文字をつけた名前を生成
             const leftEmojiNames = players.map(p => {
@@ -1990,30 +2043,6 @@
                     return pt;  // 既にfeeShareが引かれている
                 }
             });
-            // 余り計算と調整
-            const remainder = feeShare * 3 - fee;
-            
-            if (remainder > 0) {
-                // 1位、2位、3位を特定（合計ポイントで判定）
-                const rankings = total.map((pt, idx) => ({pt, idx}))
-                    .sort((a, b) => b.pt - a.pt);
-                
-                const firstIdx = rankings[0].idx;
-                const secondIdx = rankings[1].idx;
-                const thirdIdx = rankings[2].idx;
-                
-                if (remainder === 2) {
-                    // 余り2円：1位が2円多く負担、2位と3位が1円ずつ軽減
-                    balances[firstIdx] -= 2;
-                    balances[secondIdx] += 1;
-                    balances[thirdIdx] += 1;
-                } else if (remainder === 1) {
-                    // 余り1円：1位が1円多く負担、3位が1円軽減
-                    balances[firstIdx] -= 1;
-                    balances[thirdIdx] += 1;
-                }
-            }
-            
             
             // バランスとインデックスを結びつけた配列を作成
             const balanceData = balances.map((balance, index) => ({
@@ -2120,11 +2149,25 @@
         }
 
         // 現在のデータをスナップショットとして保存
-        async function saveSnapshot() {
+        // 保存ボタンクリック時（確認ダイアログ表示）
+        function saveSnapshot() {
             if (sections.length === 0) {
                 showDialog('保存するデータがありません', 'データの保存');
                 return;
             }
+            // 確認ダイアログを表示
+            document.getElementById('saveConfirmDialogOverlay').style.display = 'flex';
+        }
+        
+        // 保存確認ダイアログを閉じる
+        function closeSaveConfirmDialog() {
+            document.getElementById('saveConfirmDialogOverlay').style.display = 'none';
+        }
+        
+        // 保存を確定して実行
+        async function confirmSaveSnapshot() {
+            // 確認ダイアログを閉じる
+            closeSaveConfirmDialog();
             
             // 最新の節番号を取得
             const latestSectionNumber = sections.length;
@@ -2146,7 +2189,6 @@
             
             try {
                 // Cloudflare Workerのスナップショット用エンドポイントに保存
-                // 注: Worker側で /mahjong/snapshot エンドポイントを実装する必要があります
                 const res = await fetch(`${API_URL}/snapshot`, {
                     method: "POST",
                     headers: {
@@ -2160,11 +2202,8 @@
                 });
                 
                 if (res.status === 200) {
-                    showDialog(`記録を保存しました！\n\n${snapshotName}`, 'データの保存');
-                    // 3秒後に自動的にダイアログを閉じる
-                    setTimeout(() => {
-                        closeCustomAlert();
-                    }, 3000);
+                    // 成功ミニポップアップを表示
+                    showSaveSuccessPopup(`記録を保存しました！\n${snapshotName}`);
                 } else {
                     console.error('保存エラー', res.status);
                     showDialog('記録の保存に失敗しました。\n\nWorker側で /mahjong/snapshot エンドポイントを実装してください。', 'データの保存');
@@ -2173,6 +2212,19 @@
                 console.error('保存エラー:', error);
                 showDialog('記録の保存に失敗しました', 'データの保存');
             }
+        }
+        
+        // 保存成功ミニポップアップを表示
+        function showSaveSuccessPopup(message) {
+            const popup = document.getElementById('saveSuccessPopup');
+            const messageElement = document.getElementById('saveSuccessMessage');
+            messageElement.textContent = message;
+            popup.style.display = 'block';
+            
+            // 3秒後に自動的に閉じる
+            setTimeout(() => {
+                popup.style.display = 'none';
+            }, 3000);
         }
 
         
