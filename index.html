@@ -2206,11 +2206,11 @@
                     showSaveSuccessPopup(`記録を保存しました！\n${snapshotName}`);
                 } else {
                     console.error('保存エラー', res.status);
-                    showDialog('記録の保存に失敗しました。\n\nWorker側で /mahjong/snapshot エンドポイントを実装してください。', 'データの保存');
+                    showDialog('記録の保存に失敗しました。\n\nWorker側で /mahjong/snapshot エンドポイントを実装してください。', '失敗');
                 }
             } catch (error) {
                 console.error('保存エラー:', error);
-                showDialog('記録の保存に失敗しました', 'データの保存');
+                showDialog('記録の保存に失敗しました', '失敗');
             }
         }
         
@@ -2221,3 +2221,4 @@
     </script>
 </body>
 </html>
+
