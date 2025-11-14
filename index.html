@@ -290,12 +290,12 @@
             text-align: center;
             border: 1px solid #e0e0e0;
             font-size: 12px;
-            height: 60px !important;
+            min-height: 60px !important;
             vertical-align: middle;
         }
         
         .history-table tbody tr {
-            height: 60px !important;
+            min-height: 60px !important;
         }
 
         .history-table tr:nth-child(even) {
@@ -328,8 +328,7 @@
             position: relative !important;
             padding: 0 !important;
             white-space: normal !important;
-            height: 60px !important;
-            max-height: 60px !important;
+            min-height: 60px !important;
             background: transparent !important;
         }
 
@@ -414,7 +413,7 @@
             width: 30px !important;
             min-width: 30px !important;
             max-width: 30px !important;
-            height: 60px !important;
+            min-height: 60px !important;
         }
         
         /* プレイヤー3列（均等幅で改行なし） */
@@ -433,7 +432,7 @@
             width: 70px !important;
             min-width: 70px !important;
             max-width: 70px !important;
-            height: 60px !important;
+            min-height: 60px !important;
         }
         
         /* 操作列（細い列幅で固定） */
@@ -450,11 +449,8 @@
         .history-table td:nth-child(5) {
             width: auto !important;
             min-width: 40px !important;
-            height: 60px !important;
-            max-height: 60px !important;
             vertical-align: middle !important;
             padding: 0 !important;
-            overflow: hidden !important;
         }
         
         /* 操作セル内のボタン（縦並び＋余白あり＋小型化） */
@@ -475,16 +471,6 @@
             cursor: pointer;
             font-weight: bold;
             transition: all 0.2s ease;
-        }
-        
-        /* 編集ボタン（1つ目）を上に配置 */
-        .action-cell button:nth-child(1) {
-            top: 4px !important;
-        }
-        
-        /* 削除ボタン（2つ目）を下に配置 */
-        .action-cell button:nth-child(2) {
-            top: 32px !important;
         }
 
         .action-cell button:hover {
@@ -1364,6 +1350,30 @@
                 row.appendChild(actionCell);
                 historyList.appendChild(row);
             });
+            
+            // ボタンの位置を動的に調整
+            setTimeout(() => {
+                const rows = historyList.querySelectorAll('tr');
+                rows.forEach(row => {
+                    const actionCell = row.querySelector('.action-cell');
+                    if (!actionCell) return;
+                    
+                    const cellHeight = actionCell.offsetHeight;
+                    const center = cellHeight / 2;
+                    
+                    const editBtn = actionCell.querySelector('button:nth-child(1)');
+                    const deleteBtn = actionCell.querySelector('button:nth-child(2)');
+                    
+                    if (editBtn && deleteBtn) {
+                        // 編集ボタン: 中央から上に4px離れた位置に下端を配置
+                        // 下端が center - 4px なので、上端は center - 4px - 24px
+                        editBtn.style.top = `${center - 4 - 24}px`;
+                        
+                        // 削除ボタン: 中央から下に4px離れた位置に上端を配置
+                        deleteBtn.style.top = `${center + 4}px`;
+                    }
+                });
+            }, 0);
         }
 
         //最終ロジック（最小送ポイント回数アルゴリズム）
@@ -1510,11 +1520,11 @@
             document.getElementById("finalPointsResult").innerHTML = html;
             updatePayPayBlock(transactions);
             
-            // PayPayブロックにスクロール
+            // 最終ポイント計算結果にスクロール
             setTimeout(() => {
-                const paypayBlock = document.getElementById('paypayLinkBlock');
-                if (paypayBlock && paypayBlock.style.display !== 'none') {
-                    paypayBlock.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                const finalResult = document.getElementById('finalPointsResult');
+                if (finalResult) {
+                    finalResult.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
             }, 100);
         }
