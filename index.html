@@ -1686,15 +1686,9 @@
                 totalRow.appendChild(cell);
             });
             
-            // 操作セル（編集・削除ボタン）
+            // 操作セル（削除ボタンのみ）
             const totalActionCell = document.createElement('td');
             totalActionCell.className = 'action-cell';
-            
-            // 編集ボタン
-            const totalEditBtn = document.createElement('button');
-            totalEditBtn.textContent = '編集';
-            totalEditBtn.onclick = () => editSectionTotal(currentSectionIndex);
-            totalActionCell.appendChild(totalEditBtn);
             
             // 削除ボタン
             const totalDeleteBtn = document.createElement('button');
@@ -1718,10 +1712,15 @@
                     const cellHeight = actionCell.offsetHeight;
                     const center = cellHeight / 2;
                     
-                    const editBtn = buttons[0];
-                    const deleteBtn = buttons[1];
-                    
-                    if (editBtn && deleteBtn) {
+                    if (buttons.length === 1) {
+                        // ボタンが1つだけの場合（合計行）: 中央に配置
+                        const singleBtn = buttons[0];
+                        singleBtn.style.top = `${center - 10}px`;  // ボタン高さ20pxの半分を引く
+                    } else if (buttons.length === 2) {
+                        // ボタンが2つの場合（通常の対局行）: 上下に配置
+                        const editBtn = buttons[0];
+                        const deleteBtn = buttons[1];
+                        
                         // 編集ボタン: 中央から上に2px離れた位置に下端を配置
                         editBtn.style.top = `${center - 4 - 20}px`;
                         
