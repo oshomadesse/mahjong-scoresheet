@@ -551,7 +551,7 @@
 
         .paypay-button--disabled {
             cursor: not-allowed;
-            opacity: 0.7;
+            opacity: 0.7;.history-table
             text-decoration: none;
         }
         /* ==== 最終ポイント表のスタイル ==== */
@@ -596,13 +596,11 @@
             vertical-align: middle !important;
         }
 
-        /* 最終ポイント表では、対局履歴用の「上詰め180px」を打ち消す */
-        .final-points-table td:nth-child(2),
-        .final-points-table td:nth-child(3),
-        .final-points-table td:nth-child(4) {
-            vertical-align: middle !important;  /* 上書き */
-            min-height: auto !important;        /* 180px を解除してコンパクトに */
+        /* 最終ポイント表では、対局履歴の 180px 行高を完全に解除する */
+        .final-points-table td {
+            min-height: auto !important;   /* ★ 1〜5列すべてリセット */
         }
+        
         /* ついでにテーブル全体も標準の高さでOKなら */
         .final-points-table td,
         .final-points-table th {
@@ -1935,4 +1933,5 @@
     </script>
 </body>
 </html>
+
 
