@@ -448,6 +448,18 @@
             max-width: 70px !important;
             min-height: 180px !important;
         }
+
+        /* 対局履歴テーブルだけ、プレイヤー3列を上詰め＆180px にする */
+        .history-table:not(.final-points-table) td:nth-child(1)
+        .history-table:not(.final-points-table) td:nth-child(2),
+        .history-table:not(.final-points-table) td:nth-child(3),
+        .history-table:not(.final-points-table) td:nth-child(4)
+        .history-table:not(.final-points-table) td:nth-child(5){
+            vertical-align: top !important;
+            width: 70px !important;
+            min-width: 70px !important;
+            max-width: 70px !important;
+            min-height: 180px !important;}
         
         /* 操作列（細い列幅で固定） */
         .history-table th:nth-child(5) {
@@ -1938,6 +1950,7 @@
     </script>
 </body>
 </html>
+
 
 
 
