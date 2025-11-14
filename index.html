@@ -329,7 +329,7 @@
             padding: 0 !important;
             white-space: normal !important;
             height: 60px !important;
-            border: none !important;
+            max-height: 60px !important;
             background: transparent !important;
         }
 
@@ -451,10 +451,10 @@
             width: auto !important;
             min-width: 40px !important;
             height: 60px !important;
+            max-height: 60px !important;
             vertical-align: middle !important;
-            border-left: none !important;
-            border-right: none !important;
             padding: 0 !important;
+            overflow: hidden !important;
         }
         
         /* 操作セル内のボタン（縦並び＋余白あり＋小型化） */
@@ -1110,6 +1110,15 @@
             
             updateRanking();
             updateHistory();
+            
+            // 対局履歴の最後の行にスクロール
+            setTimeout(() => {
+                const historyTable = document.getElementById('historyTable');
+                const lastRow = historyTable?.querySelector('tbody tr:last-child');
+                if (lastRow) {
+                    lastRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 100);
 
             // 入力フィールドをクリア
             document.getElementById('score1').value = '';
@@ -1500,6 +1509,14 @@
 
             document.getElementById("finalPointsResult").innerHTML = html;
             updatePayPayBlock(transactions);
+            
+            // PayPayブロックにスクロール
+            setTimeout(() => {
+                const paypayBlock = document.getElementById('paypayLinkBlock');
+                if (paypayBlock && paypayBlock.style.display !== 'none') {
+                    paypayBlock.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 100);
         }
         
         // ページ読み込み時にデータを読み込む
