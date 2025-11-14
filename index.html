@@ -1066,6 +1066,11 @@
                 document.getElementById('passwordOverlay').style.display = 'none';
                 document.getElementById('mainContainer').style.display = 'block';
                 error.textContent = '';
+
+                // ★ここを追加：表示後に履歴・ボタン位置を再計算
+                updateRanking();   // （順位表も念のため更新したいなら）
+                updateHistory();   // ←これが重要
+                
             } else {
                 error.textContent = 'パスワードが正しくありません';
                 input.value = '';
@@ -1960,6 +1965,7 @@
     </script>
 </body>
 </html>
+
 
 
 
