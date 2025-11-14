@@ -290,12 +290,12 @@
             text-align: center;
             border: 1px solid #e0e0e0;
             font-size: 12px;
-            min-height: 90px !important;
+            min-height: 180px !important;
             vertical-align: middle;
         }
         
         .history-table tbody tr {
-            min-height: 90px !important;
+            min-height: 180px !important;
         }
 
         .history-table tr:nth-child(even) {
@@ -310,6 +310,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: flex-start;
             gap: 3px;
         }
 
@@ -387,6 +388,19 @@
             font-weight: bold;
         }
 
+        .no-badge {
+            background: transparent;          /* ← 背景色なし */
+            color: #555555;                   /* ← 深めのグレー文字 */
+            font-size: 9px;
+            padding: 2px 5px;
+            border-radius: 3px;
+            margin-top: 2px;
+            display: inline-block;
+            font-weight: bold;
+            border: 2px solid #555555;        /* ← 枠線も同じ深いグレー */
+        }
+
+
         /* ==== 対局履歴テーブル：スマホ最適化（iPhone13 mini 完全対応） ==== */
         /* 改行禁止＋余白を詰める */
         .history-table th,
@@ -413,7 +427,7 @@
             width: 30px !important;
             min-width: 30px !important;
             max-width: 30px !important;
-            min-height: 90px !important;
+            min-height: 180px !important;
         }
         
         /* プレイヤー3列（均等幅で改行なし） */
@@ -432,7 +446,7 @@
             width: 70px !important;
             min-width: 70px !important;
             max-width: 70px !important;
-            min-height: 90px !important;
+            min-height: 180px !important;
         }
         
         /* 操作列（細い列幅で固定） */
@@ -1317,15 +1331,16 @@
                         ? '<div class="tobi-badge">飛び</div>'
                         : '';
                     
+                    let badgesHtml = yakumanBadge + doubleYakumanBadge + tobashiBadge + doubleTobashiBadge + tobiBadge;
+                    if (!badgesHtml.trim()) {
+                        badgesHtml = '<div class="no-badge">なし</div>';
+                    }
+                    
                     cell.innerHTML = `
                         <div class="player-cell">
                             <div class="player-score">${game.scores[playerIndex]}点</div>
                             <div class="player-point">${game.points[playerIndex] > 0 ? '+' : ''}${game.points[playerIndex]}</div>
-                            ${yakumanBadge}
-                            ${doubleYakumanBadge}
-                            ${tobashiBadge}
-                            ${doubleTobashiBadge}
-                            ${tobiBadge}
+                            ${badgesHtml}
                         </div>
                     `;
                     row.appendChild(cell);
@@ -1534,4 +1549,5 @@
     </script>
 </body>
 </html>
+
 
