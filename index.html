@@ -290,12 +290,12 @@
             text-align: center;
             border: 1px solid #e0e0e0;
             font-size: 12px;
-            min-height: 70px !important;
+            min-height: 90px !important;
             vertical-align: middle;
         }
         
         .history-table tbody tr {
-            min-height: 70px !important;
+            min-height: 90px !important;
         }
 
         .history-table tr:nth-child(even) {
@@ -413,7 +413,7 @@
             width: 30px !important;
             min-width: 30px !important;
             max-width: 30px !important;
-            min-height: 70px !important;
+            min-height: 90px !important;
         }
         
         /* プレイヤー3列（均等幅で改行なし） */
@@ -432,7 +432,7 @@
             width: 70px !important;
             min-width: 70px !important;
             max-width: 70px !important;
-            min-height: 70px !important;
+            min-height: 90px !important;
         }
         
         /* 操作列（細い列幅で固定） */
@@ -1367,10 +1367,10 @@
                     if (editBtn && deleteBtn) {
                         // 編集ボタン: 中央から上に2px離れた位置に下端を配置
                         // 下端が center - 2px なので、上端は center - 2px - 20px
-                        editBtn.style.top = `${center - 2 - 20}px`;
+                        editBtn.style.top = `${center - 4 - 20}px`;
                         
                         // 削除ボタン: 中央から下に2px離れた位置に上端を配置
-                        deleteBtn.style.top = `${center + 2}px`;
+                        deleteBtn.style.top = `${center + 4}px`;
                     }
                 });
             }, 0);
@@ -1526,7 +1526,7 @@
                     top: document.body.scrollHeight, 
                     behavior: 'smooth' 
                 });
-            }, 100);
+            }, 200);
         }
         
         // ページ読み込み時にデータを読み込む
@@ -1534,3 +1534,4 @@
     </script>
 </body>
 </html>
+
