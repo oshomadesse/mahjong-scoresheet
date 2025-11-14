@@ -278,10 +278,11 @@
         .history-table th {
             background: linear-gradient(135deg, #2d5016 0%, #1a3d0a 100%);
             color: white;
-            padding: 10px 5px;
+            padding: 6px 5px;
             text-align: center;
             font-size: 11px;
             border: 1px solid #1a3d0a;
+            height: 30px !important;
         }
 
         .history-table td {
@@ -289,6 +290,12 @@
             text-align: center;
             border: 1px solid #e0e0e0;
             font-size: 12px;
+            height: 60px !important;
+            vertical-align: middle;
+        }
+        
+        .history-table tbody tr {
+            height: 60px !important;
         }
 
         .history-table tr:nth-child(even) {
@@ -321,9 +328,13 @@
             display: flex !important;
             flex-direction: column !important;
             align-items: center !important;
-            gap: 6px !important;
-            padding: 8px 4px !important;
+            justify-content: center !important;
+            gap: 4px !important;
+            padding: 0 !important;
             white-space: normal !important;
+            height: 60px !important;
+            border: none !important;
+            background: transparent !important;
         }
 
         .yakuman-badge {
@@ -396,42 +407,68 @@
         }
         
         /* 半荘列（改行なし＆小さく固定） */
-        .history-table th:nth-child(1),
+        .history-table th:nth-child(1) {
+            width: 30px !important;
+            min-width: 30px !important;
+            max-width: 30px !important;
+            height: 30px !important;
+        }
+        
         .history-table td:nth-child(1) {
             width: 30px !important;
             min-width: 30px !important;
             max-width: 30px !important;
+            height: 60px !important;
         }
         
         /* プレイヤー3列（均等幅で改行なし） */
         .history-table th:nth-child(2),
         .history-table th:nth-child(3),
-        .history-table th:nth-child(4),
+        .history-table th:nth-child(4) {
+            width: 70px !important;
+            min-width: 70px !important;
+            max-width: 70px !important;
+            height: 30px !important;
+        }
+        
         .history-table td:nth-child(2),
         .history-table td:nth-child(3),
         .history-table td:nth-child(4) {
-            width: 60px !important;
-            min-width: 60px !important;
-            max-width: 60px !important;
+            width: 70px !important;
+            min-width: 70px !important;
+            max-width: 70px !important;
+            height: 60px !important;
         }
         
         /* 操作列（細い列幅で固定） */
-        .history-table th:nth-child(5),
+        .history-table th:nth-child(5) {
+            width: auto !important;
+            min-width: 40px !important;
+            height: 30px !important;
+            vertical-align: middle !important;
+            border-left: none !important;
+            border-right: none !important;
+            padding: 6px 5px !important;
+        }
+        
         .history-table td:nth-child(5) {
             width: auto !important;
             min-width: 40px !important;
-            height: auto !important;
+            height: 60px !important;
             vertical-align: middle !important;
+            border-left: none !important;
+            border-right: none !important;
+            padding: 0 !important;
         }
         
         /* 操作セル内のボタン（縦並び＋余白あり＋小型化） */
         .action-cell button {
             display: block !important;   /* ← これが縦積みの決定打 */
             width: 40px !important;
-            height: 22px !important;
+            height: 24px !important;
             padding: 0 !important;
             font-size: 10px !important;
-            line-height: 22px !important;
+            line-height: 24px !important;
             margin: 0 !important;
             border: 1px solid #2d5016;
             border-radius: 4px;
@@ -557,6 +594,7 @@
             if (input.value === GOMAOPEN) {
                 saveAuth();
                 document.getElementById('passwordOverlay').style.display = 'none';
+                document.getElementById('mainContainer').style.display = 'block';
                 error.textContent = '';
             } else {
                 error.textContent = 'パスワードが正しくありません';
@@ -575,12 +613,13 @@
         // ページ読み込み時の認証チェック
         if (checkAuth()) {
             document.getElementById('passwordOverlay').style.display = 'none';
+            document.getElementById('mainContainer').style.display = 'block';
         } else {
             document.getElementById('passwordInput').focus();
         }
     </script>
 
-    <div class="container">
+    <div class="container" id="mainContainer" style="display: none;">
         <h1>🀄 麻雀スコアシート 🀄</h1>
         <h2 style="text-align:center; color:#2d5016; margin-bottom:15px; font-size:18px;">〜 Tリーグ専用 〜</h2>
 
@@ -772,7 +811,7 @@
         }
 
         // ポイント計算関数
-        function calculatePoints(scores, yakumanFlags, tobashiFlags, tobiFlags, doubleTobashiFlags) {
+        function calculatePoints(scores, yakumanFlags, tobashiFlags, tobiFlags, doubleYakumanFlags, doubleTobashiFlags) {
             // 40000を引いて1000で割る
             const basePoints = scores.map(score => (score - 40000) / 1000);
             
@@ -820,14 +859,26 @@
                 }
             });
             
-            // 飛ばしの処理
+            // 飛ばし・ダブル飛ばしの処理
             const tobashiCount = tobashiFlags.filter(x => x).length;
-            if (tobashiCount > 0 && tobiCount > 0) {
-                const bonusPerTobashi = (tobiCount * 10) / tobashiCount;
+            const doubleTobashiCount = doubleTobashiFlags.filter(x => x).length;
+            
+            // 通常の飛ばしのボーナス配分
+            if (tobashiCount > 0) {
                 tobashiFlags.forEach((isTobashi, index) => {
                     if (isTobashi) {
-                        // 飛ばしボーナスを分配
-                        finalPoints[index] += bonusPerTobashi;
+                        // 飛ばし1人につき +10ポイント
+                        finalPoints[index] += 10;
+                    }
+                });
+            }
+            
+            // ダブル飛ばしのボーナス配分
+            if (doubleTobashiCount > 0) {
+                doubleTobashiFlags.forEach((isDoubleTobashi, index) => {
+                    if (isDoubleTobashi) {
+                        // ダブル飛ばし1人につき +20ポイント
+                        finalPoints[index] += 20;
                     }
                 });
             }
@@ -859,17 +910,6 @@
                     }
                 }
             });
-            
-            // ダブル飛ばしの処理（飛ばしの2倍）
-            const doubleTobiCount = doubleTobashiFlags.filter(x => x).length;
-            if (doubleTobiCount > 0) {
-                doubleTobashiFlags.forEach((isDoubleTobashi, index) => {
-                    if (isDoubleTobashi) {
-                        // ダブル飛ばしボーナス（飛び1回分の2倍 = 20ポイント）
-                        finalPoints[index] += 20;
-                    }
-                });
-            }
             
             return finalPoints;
         }
@@ -920,16 +960,29 @@
                 document.getElementById('doubleTobashi3').checked
             ];
             
-            // 飛ばしと飛びの1対1対応チェック
+            // 飛ばし・ダブル飛ばしと飛びの対応チェック
             const tobashiCount = tobashiFlags.filter(x => x).length;
+            const doubleTobashiCount = doubleTobashiFlags.filter(x => x).length;
             const tobiCount = tobiFlags.filter(x => x).length;
             
-            if (tobashiCount !== tobiCount) {
-                alert(`「飛ばし」と「飛び」は1対1で対応させる必要があります\n現在：飛ばし ${tobashiCount}人、飛び ${tobiCount}人`);
-                return;
+            console.log('飛ばし:', tobashiCount, 'ダブル飛ばし:', doubleTobashiCount, '飛び:', tobiCount);
+            
+            // 飛ばしまたはダブル飛ばしがある場合のみチェック
+            if (tobashiCount > 0 || doubleTobashiCount > 0) {
+                // 通常の飛ばし1人 = 飛び1人、ダブル飛ばし1人 = 飛び2人
+                const requiredTobiCount = tobashiCount + (doubleTobashiCount * 2);
+                
+                console.log('必要な飛び:', requiredTobiCount, '現在の飛び:', tobiCount);
+                
+                if (requiredTobiCount !== tobiCount) {
+                    const errorMsg = `「飛ばし」「ダブル飛ばし」と「飛び」の対応が正しくありません\n飛ばし: ${tobashiCount}人、ダブル飛ばし: ${doubleTobashiCount}人\n必要な飛び: ${requiredTobiCount}人、現在の飛び: ${tobiCount}人`;
+                    console.error(errorMsg);
+                    alert(errorMsg);
+                    return;
+                }
             }
             
-            const points = calculatePoints(scores, yakumanFlags, tobashiFlags, tobiFlags, doubleTobashiFlags);
+            const points = calculatePoints(scores, yakumanFlags, tobashiFlags, tobiFlags, doubleYakumanFlags, doubleTobashiFlags);
 
             const gameData = {
                 scores: scores,
