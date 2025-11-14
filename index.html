@@ -466,6 +466,19 @@
             vertical-align: middle !important;
             padding: 0 !important;
         }
+
+        /* 合計行のプレイヤー3列だけは上下中央にする */
+        .history-table tr.total-row td:nth-child(2),
+        .history-table tr.total-row td:nth-child(3),
+        .history-table tr.total-row td:nth-child(4) {
+            vertical-align: middle !important;
+        }
+        
+        /* 合計行の中身（player-cell）もセルの高さに合わせて中央寄せ */
+        .history-table tr.total-row td .player-cell {
+            height: 100%;
+            justify-content: center;
+        }
         
         /* 操作セル内のボタン（縦並び＋余白あり＋小型化） */
         .action-cell button {
@@ -583,6 +596,18 @@
             vertical-align: middle !important;
         }
 
+        /* 最終ポイント表では、対局履歴用の「上詰め180px」を打ち消す */
+        .final-points-table td:nth-child(2),
+        .final-points-table td:nth-child(3),
+        .final-points-table td:nth-child(4) {
+            vertical-align: middle !important;  /* 上書き */
+            min-height: auto !important;        /* 180px を解除してコンパクトに */
+        }
+        /* ついでにテーブル全体も標準の高さでOKなら */
+        .final-points-table td,
+        .final-points-table th {
+            height: auto !important;
+        }
         
         /* カスタムエラーダイアログ */
         .custom-alert-overlay {
@@ -1658,13 +1683,14 @@
             
             // 合計行を追加
             const totalRow = document.createElement('tr');
+            totalRow.className = 'total-row'
             totalRow.style.backgroundColor = '#c41e3a';
             
             // 「合計」セル
             const totalLabelCell = document.createElement('td');
             totalLabelCell.textContent = '合計';
             totalLabelCell.style.fontWeight = 'bold';
-            totalLabelCell.style.fontSize = '12px';
+            totalLabelCell.style.fontSize = '11px';
             totalLabelCell.style.color = 'white';
             totalLabelCell.style.textAlign = 'center';
             totalLabelCell.style.verticalAlign = 'middle';
@@ -1909,3 +1935,4 @@
     </script>
 </body>
 </html>
+
