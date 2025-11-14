@@ -48,6 +48,30 @@
             margin-bottom: 15px;
             font-size: 18px;
             font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .ios-button {
+            background: #007AFF;
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s ease;
+            white-space: nowrap;
+        }
+        
+        .ios-button:hover {
+            opacity: 0.8;
+        }
+        
+        .ios-button:active {
+            opacity: 0.6;
         }
 
         .ranking-tabs {
@@ -1226,7 +1250,10 @@
 
         <!-- 対局履歴 -->
         <div class="section">
-            <h3 class="section-title">📜 対局履歴</h3>
+            <h3 class="section-title">
+                <span>📜 対局履歴</span>
+                <button class="ios-button" onclick="refreshData()">更新</button>
+            </h3>
             <div class="tabs-container" id="tabsContainer"></div>
             <div class="history-table-container">
                 <table class="history-table" id="historyTable">
@@ -1247,7 +1274,10 @@
 
         <!-- 最終ポイント -->
         <div class="section">
-            <h3 class="section-title">💯 最終ポイント計算</h3>
+            <h3 class="section-title">
+                <span>💯 最終ポイント計算</span>
+                <button class="ios-button" onclick="saveSnapshot()">保存</button>
+            </h3>
             
             <div class="input-grid">
                 <div class="input-item">
@@ -2023,6 +2053,78 @@
         }
         
         // ページ読み込み時にデータを読み込む
+        // 最新データを手動で取得（更新ボタン用）
+        async function refreshData() {
+            try {
+                await loadData();
+                showError('最新データを取得しました！');
+                // 2秒後に自動的にダイアログを閉じる
+                setTimeout(() => {
+                    closeCustomAlert();
+                }, 2000);
+            } catch (error) {
+                console.error('データ取得エラー:', error);
+                showError('データの取得に失敗しました');
+            }
+        }
+
+        // 現在のデータをスナップショットとして保存
+        async function saveSnapshot() {
+            if (sections.length === 0) {
+                showError('保存するデータがありません');
+                return;
+            }
+            
+            // 最新の節番号を取得
+            const latestSectionNumber = sections.length;
+            
+            // タイムスタンプを生成 (YYYYMMDD_HHMMSS)
+            const now = new Date();
+            const timestamp = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}`;
+            
+            // ファイル名を生成
+            const snapshotName = `Tリーグ第${latestSectionNumber}節時点_${timestamp}`;
+            
+            // スナップショットデータを作成
+            const snapshotData = {
+                name: snapshotName,
+                timestamp: now.toISOString(),
+                sectionNumber: latestSectionNumber,
+                sections: sections
+            };
+            
+            try {
+                // Cloudflare Workerのスナップショット用エンドポイントに保存
+                // 注: Worker側で /mahjong/snapshot エンドポイントを実装する必要があります
+                const res = await fetch(`${API_URL}/snapshot`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "x-access-token": API_TOKEN
+                    },
+                    body: JSON.stringify({
+                        key: snapshotName,
+                        data: snapshotData
+                    })
+                });
+                
+                if (res.status === 200) {
+                    showError(`記録を保存しました！\n\n${snapshotName}`);
+                    // 3秒後に自動的にダイアログを閉じる
+                    setTimeout(() => {
+                        closeCustomAlert();
+                    }, 3000);
+                } else {
+                    console.error('保存エラー', res.status);
+                    showError('記録の保存に失敗しました。\n\nWorker側で /mahjong/snapshot エンドポイントを実装してください。');
+                }
+            } catch (error) {
+                console.error('保存エラー:', error);
+                showError('記録の保存に失敗しました');
+            }
+        }
+
+        
         window.addEventListener('DOMContentLoaded', loadData);
     </script>
 </body>
