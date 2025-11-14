@@ -474,6 +474,7 @@
         }
 
         /* 対局履歴テーブルだけ、プレイヤー3列を上詰め＆180px にする */
+        .history-table:not(.final-points-table) td:nth-child(1),
         .history-table:not(.final-points-table) td:nth-child(2),
         .history-table:not(.final-points-table) td:nth-child(3),
         .history-table:not(.final-points-table) td:nth-child(4),
@@ -869,18 +870,19 @@
     </div>
     <script>
         // カスタムエラーダイアログ
-        function showDialog(message, title = 'エラー') {
+        function showDialog(message, title = 'エラー', headerColor = '#c41e3a') {
             const overlay = document.getElementById('customAlertOverlay');
             const titleElement = document.getElementById('customAlertTitle');
             const messageElement = document.getElementById('customAlertMessage');
             titleElement.textContent = title;
+            titleElement.style.background = headerColor;
             messageElement.textContent = message;
             overlay.style.display = 'flex';
         }
         
         // 後方互換性のため
         function showError(message) {
-            showDialog(message, 'エラー');
+            showDialog(message, 'エラー', '#c41e3a');
         }
         
         function closeCustomAlert() {
@@ -2215,17 +2217,6 @@
         }
         
         // 保存成功ミニポップアップを表示
-        function showSaveSuccessPopup(message) {
-            const popup = document.getElementById('saveSuccessPopup');
-            const messageElement = document.getElementById('saveSuccessMessage');
-            messageElement.textContent = message;
-            popup.style.display = 'block';
-            
-            // 3秒後に自動的に閉じる
-            setTimeout(() => {
-                popup.style.display = 'none';
-            }, 3000);
-        }
 
         
         window.addEventListener('DOMContentLoaded', loadData);
