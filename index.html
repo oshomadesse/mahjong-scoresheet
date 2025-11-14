@@ -1023,60 +1023,76 @@
 
         
         // パスワード認証チェック
-        const GOMAOPEN = 'kicha2714';
-        const AUTH_DURATION = 2 * 60 * 60 * 1000; // 2時間（ミリ秒）
-        
+        // 認証セッションの寿命（2時間）
+        const AUTH_DURATION = 2 * 60 * 60 * 1000;
+
         function checkAuth() {
             const authData = sessionStorage.getItem('mahjong-auth');
-            if (!authData) return false;
+                if (!authData) return false;
             
-            try {
-                const { timestamp } = JSON.parse(authData);
-                const now = Date.now();
-                // 2時間以内ならOK
-                if (now - timestamp < AUTH_DURATION) {
-                    updateAuthTimestamp();
-                    return true;
+                try {
+                    const { timestamp } = JSON.parse(authData);
+                    const now = Date.now();
+                    if (now - timestamp < AUTH_DURATION) {
+                        updateAuthTimestamp();
+                        return true;
+                    }
+                } catch (e) {
+                    console.error('Auth check error:', e);
                 }
-            } catch (e) {
-                console.error('Auth check error:', e);
-            }
-            
-            return false;
-        }
-        
-        function saveAuth() {
-            sessionStorage.setItem('mahjong-auth', JSON.stringify({
-                timestamp: Date.now()
-            }));
-        }
-        
-        function updateAuthTimestamp() {
-            sessionStorage.setItem('mahjong-auth', JSON.stringify({
-                timestamp: Date.now()
-            }));
-        }
-        
-        function checkPassword() {
-            const input = document.getElementById('passwordInput');
-            const error = document.getElementById('passwordError');
-            
-            if (input.value === GOMAOPEN) {
-                saveAuth();
-                document.getElementById('passwordOverlay').style.display = 'none';
-                document.getElementById('mainContainer').style.display = 'block';
-                error.textContent = '';
 
-                // ★ここを追加：表示後に履歴・ボタン位置を再計算
-                updateRanking();   // （順位表も念のため更新したいなら）
-                updateHistory();   // ←これが重要
-                
-            } else {
-                error.textContent = 'パスワードが正しくありません';
-                input.value = '';
-                input.focus();
+                return false;
             }
-        }
+
+            function saveAuth() {
+                sessionStorage.setItem('mahjong-auth', JSON.stringify({
+                    timestamp: Date.now()
+                }));
+            }
+
+            function updateAuthTimestamp() {
+                sessionStorage.setItem('mahjong-auth', JSON.stringify({
+                    timestamp: Date.now()
+                }));
+            }
+
+        
+            async function checkPassword() {
+                const input = document.getElementById('passwordInput');
+                const error = document.getElementById('passwordError');
+                const pass = input.value;
+
+                // Worker に投げてパスワード検証
+                const res = await fetch(API_URL, {
+                    method: "GET",
+                    headers: { "x-access-token": pass }
+                });
+
+                if (res.status === 200) {
+                    // 認証成功 → セッション保存
+                    API_TOKEN = pass;
+                    saveAuth();
+
+                    // UI 切り替え
+                    document.getElementById('passwordOverlay').style.display = 'none';
+                    document.getElementById('mainContainer').style.display = 'block';
+                    error.textContent = '';
+
+                    // 初回ロード
+                    const data = await res.json();
+                    sections = data?.sections || [];
+                    
+                    updateRanking();
+                    updateHistory();
+
+                } else {
+                    // 認証失敗
+                    error.textContent = 'パスワードが正しくありません';
+                    input.value = '';
+                    input.focus();
+                }
+            }
+
         
         // Enterキーでもログイン
         window.addEventListener('DOMContentLoaded', function() {
@@ -1255,6 +1271,15 @@
 
     <!-- JavaScript -->
     <script>
+        // --- パスワード入力（HTMLにはパスワードを保存しない） ---
+        let API_TOKEN = null;
+        const API_URL = "https://mahjong-scoresheet-api.oshomadesse.workers.dev/mahjong";
+
+        // 初回ロード時に必ずパスワード入力させる
+        function requestPassword() {
+            API_TOKEN = prompt("パスワードを入力してください：");
+        }
+        
         const players = ['🦎ジェッツ西方🦎', '🐺ビースト高橋🐺', '🥊ファイト大田🥊'];
         const shortNames = players.map(p => {
             const chars = Array.from(p);  // 絵文字を正しく扱うために配列化
@@ -1263,34 +1288,71 @@
             const name = p.replace(/.*(西方|高橋|大田).*/, "$1"); // 名字抽出
             return `${emojiStart}${name}${emojiEnd}`;
         });
-
+        
         let sections = []; // 節ごとのデータ [{games: [...]}]
         let currentSectionIndex = 0; // 現在表示中の節のインデックス
         let rankingMode = 'today'; // 'today' or 'total'
 
-        // ローカルストレージからデータを読み込み
-        function loadData() {
-            const saved = localStorage.getItem('tleague-sections');
-            if (saved) {
-                sections = JSON.parse(saved);
-                if (sections.length === 0) {
-                    // 初回は第1節を作成
-                    sections.push({ games: [] });
-                }
-                currentSectionIndex = sections.length - 1; // 最新の節を表示
-            } else {
-                // 初回は第1節を作成
-                sections = [{ games: [] }];
-                currentSectionIndex = 0;
+        // -------------------------
+        // Cloudflare Worker からデータを読み込み
+        // -------------------------
+        async function loadData() {
+
+            // ① 認証セッションの確認（2時間以内ならOK）
+            if (!checkAuth()) {
+                // パスワード未入力 or 有効期限切れ → パスワード画面を表示
+                document.getElementById('passwordOverlay').style.display = 'block';
+                document.getElementById('mainContainer').style.display = 'none';
+                return;
             }
+        
+            // ② Worker へ GET して最新データ取得
+            const res = await fetch(API_URL, {
+                method: "GET",
+                headers: {
+                    "x-access-token": API_TOKEN
+                }
+            });
+        
+            if (res.status !== 200) {
+                console.error("データ取得エラー", res.status);
+                alert("データ取得中に問題が発生しました");
+                return;
+            }
+        
+            const data = await res.json();
+            sections = data?.sections || [];
+        
+            // ③ 初回利用の場合は空なら第1節を作る
+            if (sections.length === 0) {
+                sections.push({ games: [] });
+            }
+        
+            currentSectionIndex = sections.length - 1;
+        
             updateRanking();
             updateHistory();
         }
-
-        // ローカルストレージにデータを保存
-        function saveData() {
-            localStorage.setItem('tleague-sections', JSON.stringify(sections));
+        
+        // -------------------------
+        // Cloudflare Worker へデータ保存
+        // -------------------------
+        async function saveData() {
+            const res = await fetch(API_URL, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "x-access-token": API_TOKEN
+                },
+                body: JSON.stringify({ sections })
+            });
+        
+            if (res.status !== 200) {
+                console.error("保存エラー", res.status);
+                alert("データ保存に失敗しました");
+            }
         }
+
 
         // ポイント計算関数
         function calculatePoints(scores, yakumanFlags, tobashiFlags, tobiFlags, doubleYakumanFlags, doubleTobashiFlags) {
@@ -1965,6 +2027,7 @@
     </script>
 </body>
 </html>
+
 
 
 
