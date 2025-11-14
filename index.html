@@ -325,11 +325,7 @@
         }
         
         .action-cell {
-            display: flex !important;
-            flex-direction: column !important;
-            align-items: center !important;
-            justify-content: center !important;
-            gap: 4px !important;
+            position: relative !important;
             padding: 0 !important;
             white-space: normal !important;
             height: 60px !important;
@@ -463,7 +459,9 @@
         
         /* 操作セル内のボタン（縦並び＋余白あり＋小型化） */
         .action-cell button {
-            display: block !important;   /* ← これが縦積みの決定打 */
+            position: absolute !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
             width: 40px !important;
             height: 24px !important;
             padding: 0 !important;
@@ -478,14 +476,24 @@
             font-weight: bold;
             transition: all 0.2s ease;
         }
+        
+        /* 編集ボタン（1つ目）を上に配置 */
+        .action-cell button:nth-child(1) {
+            top: 4px !important;
+        }
+        
+        /* 削除ボタン（2つ目）を下に配置 */
+        .action-cell button:nth-child(2) {
+            top: 32px !important;
+        }
 
         .action-cell button:hover {
             background: #e8f5e9;
-            transform: scale(1.05);
+            transform: translateX(-50%) scale(1.05) !important;
         }
 
         .action-cell button:active {
-            transform: scale(0.95);
+            transform: translateX(-50%) scale(0.95) !important;
         }
 
         .paypay-block {
@@ -533,6 +541,71 @@
             opacity: 0.7;
             text-decoration: none;
         }
+        
+        /* カスタムエラーダイアログ */
+        .custom-alert-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 20000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .custom-alert-box {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            width: 90%;
+            overflow: hidden;
+        }
+        
+        .custom-alert-header {
+            background: #c41e3a;
+            color: white;
+            padding: 15px 20px;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        
+        .custom-alert-body {
+            padding: 20px;
+            color: #333;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .custom-alert-footer {
+            padding: 15px 20px;
+            text-align: right;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .custom-alert-button {
+            background: linear-gradient(135deg, #c41e3a 0%, #9a1529 100%);
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .custom-alert-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(196, 30, 58, 0.4);
+        }
+        
+        .custom-alert-button:active {
+            transform: translateY(0);
+        }
     </style>
 </head>
 <body>
@@ -551,7 +624,31 @@
         </div>
     </div>
 
+    <!-- カスタムエラーダイアログ -->
+    <div id="customAlertOverlay" class="custom-alert-overlay">
+        <div class="custom-alert-box">
+            <div class="custom-alert-header">エラー</div>
+            <div class="custom-alert-body" id="customAlertMessage"></div>
+            <div class="custom-alert-footer">
+                <button class="custom-alert-button" onclick="closeCustomAlert()">OK</button>
+            </div>
+        </div>
+    </div>
+
     <script>
+        // カスタムエラーダイアログ
+        function showError(message) {
+            const overlay = document.getElementById('customAlertOverlay');
+            const messageElement = document.getElementById('customAlertMessage');
+            messageElement.textContent = message;
+            overlay.style.display = 'flex';
+        }
+        
+        function closeCustomAlert() {
+            const overlay = document.getElementById('customAlertOverlay');
+            overlay.style.display = 'none';
+        }
+        
         // パスワード認証チェック
         const GOMAOPEN = 'kicha2714';
         const AUTH_DURATION = 2 * 60 * 60 * 1000; // 2時間（ミリ秒）
@@ -604,19 +701,27 @@
         }
         
         // Enterキーでもログイン
-        document.getElementById('passwordInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                checkPassword();
+        window.addEventListener('DOMContentLoaded', function() {
+            const passwordInput = document.getElementById('passwordInput');
+            if (passwordInput) {
+                passwordInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        checkPassword();
+                    }
+                });
+            }
+            
+            // ページ読み込み時の認証チェック
+            if (checkAuth()) {
+                const overlay = document.getElementById('passwordOverlay');
+                const container = document.getElementById('mainContainer');
+                if (overlay) overlay.style.display = 'none';
+                if (container) container.style.display = 'block';
+            } else {
+                const passwordInput = document.getElementById('passwordInput');
+                if (passwordInput) passwordInput.focus();
             }
         });
-        
-        // ページ読み込み時の認証チェック
-        if (checkAuth()) {
-            document.getElementById('passwordOverlay').style.display = 'none';
-            document.getElementById('mainContainer').style.display = 'block';
-        } else {
-            document.getElementById('passwordInput').focus();
-        }
     </script>
 
     <div class="container" id="mainContainer" style="display: none;">
@@ -921,14 +1026,14 @@
             const score3 = parseInt(document.getElementById('score3').value);
 
             if (isNaN(score1) || isNaN(score2) || isNaN(score3)) {
-                alert('すべての点数を入力してください');
+                showError('すべての点数を入力してください');
                 return;
             }
             
             // 合計105000チェック
             const sum = score1 + score2 + score3;
             if (sum !== 105000) {
-                alert(`3人の点数の合計が 105000 ではありません（現在: ${sum}）`);
+                showError(`3人の点数の合計が 105000 ではありません（現在: ${sum}）`);
                 return;
             }
 
@@ -967,19 +1072,16 @@
             
             console.log('飛ばし:', tobashiCount, 'ダブル飛ばし:', doubleTobashiCount, '飛び:', tobiCount);
             
-            // 飛ばしまたはダブル飛ばしがある場合のみチェック
-            if (tobashiCount > 0 || doubleTobashiCount > 0) {
-                // 通常の飛ばし1人 = 飛び1人、ダブル飛ばし1人 = 飛び2人
-                const requiredTobiCount = tobashiCount + (doubleTobashiCount * 2);
-                
-                console.log('必要な飛び:', requiredTobiCount, '現在の飛び:', tobiCount);
-                
-                if (requiredTobiCount !== tobiCount) {
-                    const errorMsg = `「飛ばし」「ダブル飛ばし」と「飛び」の対応が正しくありません\n飛ばし: ${tobashiCount}人、ダブル飛ばし: ${doubleTobashiCount}人\n必要な飛び: ${requiredTobiCount}人、現在の飛び: ${tobiCount}人`;
-                    console.error(errorMsg);
-                    alert(errorMsg);
-                    return;
-                }
+            // 飛ばしと飛びの1対1チェック
+            if (tobashiCount > 0 && tobashiCount !== tobiCount) {
+                showError('「飛ばし」と「飛び」の人数が一致していません');
+                return;
+            }
+            
+            // ダブル飛ばしと飛びの1対2チェック
+            if (doubleTobashiCount > 0 && doubleTobashiCount * 2 !== tobiCount) {
+                showError('「ダブル飛ばし」と「飛び」の人数が一致していません');
+                return;
             }
             
             const points = calculatePoints(scores, yakumanFlags, tobashiFlags, tobiFlags, doubleYakumanFlags, doubleTobashiFlags);
@@ -1053,13 +1155,13 @@
             );
 
             if (newPoints.some(p => isNaN(p))) {
-                alert("正しいポイントを入力してください");
+                showError("正しいポイントを入力してください");
                 return;
             }
             
             const sum = newPoints[0] + newPoints[1] + newPoints[2];
             if (sum !== 0) {
-                alert("3人のポイントの合計が 0 ではありません。");
+                showError("3人のポイントの合計が 0 ではありません。");
                 return;
             }
 
@@ -1259,7 +1361,7 @@
         function calcFinalPoints() {
             const fee = parseInt(document.getElementById("tableFee").value);
             if (isNaN(fee) || fee <= 0) {
-                alert("ゲーム代を入力してください");
+                showError("ゲーム代を入力してください");
                 return;
             }
         
