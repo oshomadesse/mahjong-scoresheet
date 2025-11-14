@@ -862,10 +862,6 @@
         </div>
     </div>
 
-    <!-- 保存成功ミニポップアップ -->
-    <div id="saveSuccessPopup" style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #4CAF50; color: white; padding: 15px 25px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 50000; display: none; font-weight: bold; font-size: 14px; animation: slideDown 0.3s ease;">
-        <div id="saveSuccessMessage"></div>
-    </div>
     <script>
         // カスタムエラーダイアログ
         function showDialog(message, title = 'エラー', headerColor = '#c41e3a') {
@@ -2201,24 +2197,24 @@
                     })
                 });
                 
-                if (res.status === 200) {
-                    // 成功ミニポップアップを表示
-                    showSaveSuccessPopup(`記録を保存しました！\n${snapshotName}`);
+                if (res.ok) {
+                    // ✅ 成功：カスタムダイアログ（ヘッダー緑・タイトル「成功」）
+                    showDialog(`記録を保存しました！\n${snapshotName}`, '成功', '#2d5016');
                 } else {
                     console.error('保存エラー', res.status);
-                    showDialog('記録の保存に失敗しました。\n\nWorker側で /mahjong/snapshot エンドポイントを実装してください。', '失敗');
+                    showDialog(
+                        '記録の保存に失敗しました。\n\nWorker側で /mahjong/snapshot エンドポイントを実装してください。',
+                        '失敗'
+                    );
                 }
             } catch (error) {
                 console.error('保存エラー:', error);
                 showDialog('記録の保存に失敗しました', '失敗');
             }
         }
-        
-        // 保存成功ミニポップアップを表示
-
-        
         window.addEventListener('DOMContentLoaded', loadData);
     </script>
 </body>
 </html>
+
 
