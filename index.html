@@ -541,6 +541,48 @@
             opacity: 0.7;
             text-decoration: none;
         }
+        /* ==== 最終ポイント表のスタイル ==== */
+        .final-points-table th:nth-child(1),
+        .final-points-table td:nth-child(1) {
+            width: 60px !important;
+            min-width: 60px !important;
+            max-width: 60px !important;
+        }
+        
+        .final-points-table th:nth-child(2),
+        .final-points-table td:nth-child(2) {
+            width: 45px !important;
+            min-width: 45px !important;
+            max-width: 45px !important;
+        }
+        
+        .final-points-table th:nth-child(3),
+        .final-points-table td:nth-child(3) {
+            width: 45px !important;
+            min-width: 45px !important;
+            max-width: 45px !important;
+        }
+        
+        .final-points-table th:nth-child(4),
+        .final-points-table td:nth-child(4) {
+            width: 45px !important;
+            min-width: 45px !important;
+            max-width: 45px !important;
+        }
+        
+        .final-points-table th:nth-child(5),
+        .final-points-table td:nth-child(5) {
+            width: auto !important;
+            font-weight: bold;
+        }
+        
+        .final-points-table th,
+        .final-points-table td {
+            white-space: nowrap;
+            text-align: center;
+            vertical-align: middle;
+        }
+
         
         /* カスタムエラーダイアログ */
         .custom-alert-overlay {
@@ -746,44 +788,84 @@
         // 編集ダイアログを閉じる
         function closeEditDialog() {
             document.getElementById('editDialogOverlay').style.display = 'none';
+            
+            // 点数フィールドの無効化を解除
+            document.getElementById('editScore1').disabled = false;
+            document.getElementById('editScore2').disabled = false;
+            document.getElementById('editScore3').disabled = false;
+            
+            // ヘッダーを元に戻す
+            document.querySelector('#editDialogOverlay .custom-alert-header').textContent = '対局結果を編集';
+            
             editingSectionIndex = null;
             editingGameIndex = null;
         }
         
         // 編集を保存
         function saveEditedGame() {
-            const newScores = [
-                parseInt(document.getElementById('editScore1').value),
-                parseInt(document.getElementById('editScore2').value),
-                parseInt(document.getElementById('editScore3').value)
-            ];
-            
             const newPoints = [
                 parseFloat(document.getElementById('editPoint1').value),
                 parseFloat(document.getElementById('editPoint2').value),
                 parseFloat(document.getElementById('editPoint3').value)
             ];
             
-            if (newScores.some(s => isNaN(s)) || newPoints.some(p => isNaN(p))) {
+            if (newPoints.some(p => isNaN(p))) {
                 showError('すべての値を正しく入力してください');
-                return;
-            }
-            
-            const scoreSum = newScores[0] + newScores[1] + newScores[2];
-            if (scoreSum !== 105000) {
-                showError(`3人の点数の合計が 105000 ではありません（現在: ${scoreSum}）`);
                 return;
             }
             
             const pointSum = newPoints[0] + newPoints[1] + newPoints[2];
             if (Math.abs(pointSum) > 0.1) {
-                showError(`3人のポイントの合計が 0 ではありません（現在: ${pointSum}）`);
+                showError(`3人のポイントの合計が 0 ではありません（現在: ${pointSum.toFixed(1)}）`);
                 return;
             }
             
-            const game = sections[editingSectionIndex].games[editingGameIndex];
-            game.scores = newScores;
-            game.points = newPoints;
+            // 節の合計編集の場合
+            if (editingGameIndex === null) {
+                // 現在の合計を計算
+                const section = sections[editingSectionIndex];
+                const currentTotal = [0, 0, 0];
+                section.games.forEach(game => {
+                    game.points.forEach((p, i) => currentTotal[i] += p);
+                });
+                
+                // 差分を計算
+                const diff = [
+                    newPoints[0] - currentTotal[0],
+                    newPoints[1] - currentTotal[1],
+                    newPoints[2] - currentTotal[2]
+                ];
+                
+                // 最後の対局に差分を適用
+                if (section.games.length > 0) {
+                    const lastGame = section.games[section.games.length - 1];
+                    lastGame.points[0] += diff[0];
+                    lastGame.points[1] += diff[1];
+                    lastGame.points[2] += diff[2];
+                }
+            } else {
+                // 個別の対局編集の場合
+                const newScores = [
+                    parseInt(document.getElementById('editScore1').value),
+                    parseInt(document.getElementById('editScore2').value),
+                    parseInt(document.getElementById('editScore3').value)
+                ];
+                
+                if (newScores.some(s => isNaN(s))) {
+                    showError('すべての値を正しく入力してください');
+                    return;
+                }
+                
+                const scoreSum = newScores[0] + newScores[1] + newScores[2];
+                if (scoreSum !== 105000) {
+                    showError(`3人の点数の合計が 105000 ではありません（現在: ${scoreSum}）`);
+                    return;
+                }
+                
+                const game = sections[editingSectionIndex].games[editingGameIndex];
+                game.scores = newScores;
+                game.points = newPoints;
+            }
             
             saveData();
             updateHistory();
@@ -811,13 +893,28 @@
         
         // 削除を確定
         function confirmDelete() {
-            if (deletingSectionIndex !== null && deletingGameIndex !== null) {
-                sections[deletingSectionIndex].games.splice(deletingGameIndex, 1);
-                
-                if (sections[deletingSectionIndex].games.length === 0 && sections.length > 1) {
-                    sections.splice(deletingSectionIndex, 1);
-                    if (currentSectionIndex >= sections.length) {
-                        currentSectionIndex = sections.length - 1;
+            if (deletingSectionIndex !== null) {
+                if (deletingGameIndex !== null) {
+                    // 個別の対局を削除
+                    sections[deletingSectionIndex].games.splice(deletingGameIndex, 1);
+                    
+                    if (sections[deletingSectionIndex].games.length === 0 && sections.length > 1) {
+                        sections.splice(deletingSectionIndex, 1);
+                        if (currentSectionIndex >= sections.length) {
+                            currentSectionIndex = sections.length - 1;
+                        }
+                    }
+                } else {
+                    // 節全体を削除
+                    if (sections.length > 1) {
+                        sections.splice(deletingSectionIndex, 1);
+                        if (currentSectionIndex >= sections.length) {
+                            currentSectionIndex = sections.length - 1;
+                        }
+                    } else {
+                        showError('最後の節は削除できません');
+                        closeDeleteDialog();
+                        return;
                     }
                 }
                 
@@ -827,6 +924,52 @@
                 closeDeleteDialog();
             }
         }
+        
+        // 節の合計を編集
+        function editSectionTotal(sectionIndex) {
+            const section = sections[sectionIndex];
+            
+            // 各プレイヤーの合計ポイントを計算
+            const totalPoints = [0, 0, 0];
+            section.games.forEach(game => {
+                game.points.forEach((p, i) => totalPoints[i] += p);
+            });
+            
+            editingSectionIndex = sectionIndex;
+            editingGameIndex = null; // 節全体の編集なのでnull
+            
+            // 編集ダイアログに合計値を設定（点数は0で固定）
+            document.getElementById('editScore1').value = 0;
+            document.getElementById('editScore2').value = 0;
+            document.getElementById('editScore3').value = 0;
+            document.getElementById('editPoint1').value = totalPoints[0];
+            document.getElementById('editPoint2').value = totalPoints[1];
+            document.getElementById('editPoint3').value = totalPoints[2];
+            
+            // 点数フィールドを無効化
+            document.getElementById('editScore1').disabled = true;
+            document.getElementById('editScore2').disabled = true;
+            document.getElementById('editScore3').disabled = true;
+            
+            // ヘッダーを変更
+            document.querySelector('#editDialogOverlay .custom-alert-header').textContent = '第' + (sectionIndex + 1) + '節の合計を編集';
+            
+            document.getElementById('editDialogOverlay').style.display = 'flex';
+        }
+        
+        // 節全体を削除
+        function deleteSection(sectionIndex) {
+            deletingSectionIndex = sectionIndex;
+            deletingGameIndex = null;
+            
+            const section = sections[sectionIndex];
+            const gameCount = section.games.length;
+            
+            document.getElementById('deleteDialogMessage').textContent = 
+                `第${sectionIndex + 1}節を削除しますか？（${gameCount}半荘のデータが削除されます）`;
+            document.getElementById('deleteDialogOverlay').style.display = 'flex';
+        }
+
 
         
         // パスワード認証チェック
@@ -1513,6 +1656,55 @@
                 historyList.appendChild(row);
             });
             
+            // 合計行を追加
+            const totalRow = document.createElement('tr');
+            totalRow.style.fontWeight = 'bold';
+            totalRow.style.backgroundColor = '#e8f5e9';
+            
+            // 「合計」セル
+            const totalLabelCell = document.createElement('td');
+            totalLabelCell.textContent = '合計';
+            totalLabelCell.style.fontWeight = 'bold';
+            totalLabelCell.style.fontSize = '12px';
+            totalRow.appendChild(totalLabelCell);
+            
+            // 各プレイヤーの合計ポイントを計算
+            const totalPoints = [0, 0, 0];
+            currentSection.games.forEach(game => {
+                game.points.forEach((p, i) => totalPoints[i] += p);
+            });
+            
+            // 各プレイヤーの合計セル
+            players.forEach((name, playerIndex) => {
+                const cell = document.createElement('td');
+                cell.style.textAlign = 'center';
+                cell.innerHTML = `
+                    <div class="player-cell">
+                        <div class="player-point" style="font-weight: bold;">${totalPoints[playerIndex] > 0 ? '+' : ''}${totalPoints[playerIndex]}</div>
+                    </div>
+                `;
+                totalRow.appendChild(cell);
+            });
+            
+            // 操作セル（編集・削除ボタン）
+            const totalActionCell = document.createElement('td');
+            totalActionCell.className = 'action-cell';
+            
+            // 編集ボタン
+            const totalEditBtn = document.createElement('button');
+            totalEditBtn.textContent = '編集';
+            totalEditBtn.onclick = () => editSectionTotal(currentSectionIndex);
+            totalActionCell.appendChild(totalEditBtn);
+            
+            // 削除ボタン
+            const totalDeleteBtn = document.createElement('button');
+            totalDeleteBtn.textContent = '削除';
+            totalDeleteBtn.onclick = () => deleteSection(currentSectionIndex);
+            totalActionCell.appendChild(totalDeleteBtn);
+            
+            totalRow.appendChild(totalActionCell);
+            historyList.appendChild(totalRow);
+            
             // ボタンの位置を動的に調整
             setTimeout(() => {
                 const rows = historyList.querySelectorAll('tr');
@@ -1520,15 +1712,17 @@
                     const actionCell = row.querySelector('.action-cell');
                     if (!actionCell) return;
                     
+                    const buttons = actionCell.querySelectorAll('button');
+                    if (buttons.length === 0) return;
+                    
                     const cellHeight = actionCell.offsetHeight;
                     const center = cellHeight / 2;
                     
-                    const editBtn = actionCell.querySelector('button:nth-child(1)');
-                    const deleteBtn = actionCell.querySelector('button:nth-child(2)');
+                    const editBtn = buttons[0];
+                    const deleteBtn = buttons[1];
                     
                     if (editBtn && deleteBtn) {
                         // 編集ボタン: 中央から上に2px離れた位置に下端を配置
-                        // 下端が center - 2px なので、上端は center - 2px - 20px
                         editBtn.style.top = `${center - 4 - 20}px`;
                         
                         // 削除ボタン: 中央から下に2px離れた位置に上端を配置
@@ -1573,15 +1767,29 @@
         
             // --- 最終ポイント表の生成 ---
             let html = `
-                <table class="history-table">
+                <table class="history-table final-points-table">
                     <thead>
-                        <tr><th>プレイヤー</th><th>最終ポイント</th></tr>
+                        <tr>
+                            <th>プレイヤー</th>
+                            <th>合計</th>
+                            <th>×50</th>
+                            <th>場代</th>
+                            <th>最終ポイント</th>
+                        </tr>
                     </thead>
                     <tbody>
             `;
 
             players.forEach((name, i) => {
-                html += `<tr><td>${leftEmojiNames[i]}</td><td>${final[i]}</td></tr>`;
+                html += `
+                    <tr>
+                        <td>${leftEmojiNames[i]}</td>
+                        <td>${total[i]}</td>
+                        <td>${moneyPoints[i]}</td>
+                        <td>-${feeShare}</td>
+                        <td style="font-weight: bold; color: #c41e3a;">${final[i]}</td>
+                    </tr>
+                `;
             });
 
             html += `
