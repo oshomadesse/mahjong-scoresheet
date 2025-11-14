@@ -634,7 +634,6 @@
             </div>
         </div>
     </div>
-
     <!-- 編集ダイアログ -->
     <div id="editDialogOverlay" class="custom-alert-overlay">
         <div class="custom-alert-box">
@@ -703,6 +702,7 @@
         </div>
     </div>
 
+
     <script>
         // カスタムエラーダイアログ
         function showError(message) {
@@ -716,7 +716,6 @@
             const overlay = document.getElementById('customAlertOverlay');
             overlay.style.display = 'none';
         }
-        
         // 編集ダイアログ用の変数
         let editingSectionIndex = null;
         let editingGameIndex = null;
@@ -828,6 +827,7 @@
                 closeDeleteDialog();
             }
         }
+
         
         // パスワード認証チェック
         const GOMAOPEN = 'kicha2714';
@@ -1326,11 +1326,8 @@
             showDeleteDialog(sectionIndex, gameIndex);
         }
         
-        
         function editGame(sectionIndex, gameIndex) {
             showEditDialog(sectionIndex, gameIndex);
-        }
-
         }
 
 
