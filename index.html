@@ -596,9 +596,14 @@
             vertical-align: middle !important;
         }
 
-        /* 最終ポイント表では、対局履歴の 180px 行高を完全に解除する */
-        .final-points-table td {
-            min-height: auto !important;   /* ★ 1〜5列すべてリセット */
+        /* 最終ポイント表では、対局履歴用の「上詰め180px」を打ち消す */
+        .final-points-table td:nth-child(1)
+        .final-points-table td:nth-child(2),
+        .final-points-table td:nth-child(3),
+        .final-points-table td:nth-child(4)
+        .final-points-table td:nth-child(5){
+            vertical-align: middle !important;  /* 上書き */
+            min-height: auto !important;        /* 180px を解除してコンパクトに */
         }
         
         /* ついでにテーブル全体も標準の高さでOKなら */
@@ -1933,5 +1938,6 @@
     </script>
 </body>
 </html>
+
 
 
