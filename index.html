@@ -1140,33 +1140,51 @@
                 const error = document.getElementById('passwordError');
                 const pass = input.value;
 
-                // Worker に投げてパスワード検証
-                const res = await fetch(API_URL, {
-                    method: "GET",
-                    headers: { "x-access-token": pass }
-                });
-
-                if (res.status === 200) {
-                    // 認証成功 → セッション保存
-                    API_TOKEN = pass;
-                    saveAuth();
-
-                    // UI 切り替え
-                    document.getElementById('passwordOverlay').style.display = 'none';
-                    document.getElementById('mainContainer').style.display = 'block';
-                    error.textContent = '';
-
-                    // 初回ロード
-                    const data = await res.json();
-                    sections = data?.sections || [];
+                try {
+                    console.log('パスワード認証を開始します...');
+                    console.log('API URL:', API_URL);
                     
-                    updateRanking();
-                    updateHistory();
+                    // Worker に投げてパスワード検証
+                    const res = await fetch(API_URL, {
+                        method: "GET",
+                        headers: { "x-access-token": pass }
+                    });
 
-                } else {
-                    // 認証失敗
-                    error.textContent = 'パスワードが正しくありません';
-                    input.value = '';
+                    console.log('レスポンスステータス:', res.status);
+
+                    if (res.status === 200) {
+                        console.log('認証成功！');
+                        
+                        // 認証成功 → セッション保存
+                        API_TOKEN = pass;
+                        saveAuth();
+
+                        // UI 切り替え
+                        document.getElementById('passwordOverlay').style.display = 'none';
+                        document.getElementById('mainContainer').style.display = 'block';
+                        error.textContent = '';
+
+                        // 初回ロード
+                        const data = await res.json();
+                        console.log('データ取得成功:', data);
+                        sections = data?.sections || [];
+                        
+                        updateRanking();
+                        updateHistory();
+
+                    } else {
+                        // 認証失敗
+                        console.log('認証失敗: ステータスコード', res.status);
+                        const responseText = await res.text();
+                        console.log('レスポンス内容:', responseText);
+                        error.textContent = 'パスワードが正しくありません (Status: ' + res.status + ')';
+                        input.value = '';
+                        input.focus();
+                    }
+                } catch (err) {
+                    // エラーが発生した場合
+                    console.error('ログインエラー:', err);
+                    error.textContent = 'ログインに失敗しました: ' + err.message;
                     input.focus();
                 }
             }
@@ -2262,5 +2280,6 @@
     </script>
 </body>
 </html>
+
 
 
