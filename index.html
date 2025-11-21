@@ -863,6 +863,10 @@
     </div>
 
     <script>
+        // --- API設定 ---
+        let API_TOKEN = null;
+        const API_URL = "https://mahjong-scoresheet-api.oshomadesse.workers.dev/mahjong";
+        
         // カスタムエラーダイアログ
         function showDialog(message, title = 'エラー', headerColor = '#c41e3a') {
             const overlay = document.getElementById('customAlertOverlay');
@@ -1409,10 +1413,6 @@
 
     <!-- JavaScript -->
     <script>
-        // --- パスワード入力（HTMLにはパスワードを保存しない） ---
-        let API_TOKEN = null;
-        const API_URL = "https://mahjong-scoresheet-api.oshomadesse.workers.dev/mahjong";
-
         // 初回ロード時に必ずパスワード入力させる
         function requestPassword() {
             API_TOKEN = prompt("パスワードを入力してください：");
@@ -2280,6 +2280,7 @@
     </script>
 </body>
 </html>
+
 
 
 
