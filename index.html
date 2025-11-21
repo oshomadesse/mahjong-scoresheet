@@ -1234,9 +1234,30 @@
         
         // 点数の自動入力機能
         function setupAutoCalculation() {
-            const score1 = document.getElementById('score1');
-            const score2 = document.getElementById('score2');
-            const score3 = document.getElementById('score3');
+        // まず入力値を取得
+        const score1Input = document.getElementById('score1');
+        const score2Input = document.getElementById('score2');
+        const score3Input = document.getElementById('score3');
+        
+        // 2つの点数が入力されていて、3つ目が空の場合は自動計算
+        const s1 = parseInt(score1Input.value) || 0;
+        const s2 = parseInt(score2Input.value) || 0;
+        const s3 = parseInt(score3Input.value) || 0;
+        
+        if (score1Input.value && score2Input.value && !score3Input.value) {
+            score3Input.value = 105000 - s1 - s2;
+        }
+        else if (score1Input.value && score3Input.value && !score2Input.value) {
+            score2Input.value = 105000 - s1 - s3;
+        }
+        else if (score2Input.value && score3Input.value && !score1Input.value) {
+            score1Input.value = 105000 - s2 - s3;
+        }
+        
+        // 計算後の値を取得
+        const score1 = parseInt(score1Input.value);
+        const score2 = parseInt(score2Input.value);
+        const score3 = parseInt(score3Input.value);
             
             if (!score1 || !score2 || !score3) return;
             
@@ -1258,10 +1279,6 @@
                     score1.value = 105000 - s2 - s3;
                 }
             }
-            
-            score1.addEventListener('input', autoFillScore);
-            score2.addEventListener('input', autoFillScore);
-            score3.addEventListener('input', autoFillScore);
         }
     </script>
 
@@ -2279,6 +2296,7 @@
     </script>
 </body>
 </html>
+
 
 
 
