@@ -466,304 +466,224 @@
         .history-table td:nth-child(2),
         .history-table td:nth-child(3),
         .history-table td:nth-child(4) {
-            vertical-align: top !important;
             width: 70px !important;
             min-width: 70px !important;
             max-width: 70px !important;
-            min-height: 180px !important;
+            vertical-align: middle;
         }
-
-        /* 対局履歴テーブルだけ、プレイヤー3列を上詰め＆180px にする */
-        .history-table:not(.final-points-table) td:nth-child(2),
-        .history-table:not(.final-points-table) td:nth-child(3),
-        .history-table:not(.final-points-table) td:nth-child(4),
-        .history-table:not(.final-points-table) td:nth-child(5){
-            vertical-align: top !important;
-            width: 70px !important;
-            min-width: 70px !important;
-            max-width: 70px !important;
-            min-height: 180px !important;}
         
-        /* 操作列（細い列幅で固定） */
+        /* 操作列（改行なし＆小さく固定） */
         .history-table th:nth-child(5) {
-            width: auto !important;
+            width: 40px !important;
             min-width: 40px !important;
+            max-width: 40px !important;
             height: 30px !important;
-            vertical-align: middle !important;
-            border-left: none !important;
-            border-right: none !important;
-            padding: 6px 5px !important;
         }
         
         .history-table td:nth-child(5) {
-            width: auto !important;
-            min-width: 40px !important;
-            vertical-align: middle !important;
-            padding: 0 !important;
-        }
-
-        /* 合計行のプレイヤー3列だけは上下中央にする */
-        .history-table tr.total-row td:nth-child(2),
-        .history-table tr.total-row td:nth-child(3),
-        .history-table tr.total-row td:nth-child(4) {
-            vertical-align: middle !important;
-        }
-        
-        /* 合計行の中身（player-cell）もセルの高さに合わせて中央寄せ */
-        .history-table tr.total-row td .player-cell {
-            height: 100%;
-            justify-content: center;
-        }
-        
-        /* 操作セル内のボタン（縦並び＋余白あり＋小型化） */
-        .action-cell button {
-            position: absolute !important;
-            left: 50% !important;
-            transform: translateX(-50%) !important;
             width: 40px !important;
-            height: 20px !important;
-            padding: 0 !important;
-            font-size: 10px !important;
-            line-height: 20px !important;
-            margin: 0 !important;
-            border: 1px solid #2d5016;
+            min-width: 40px !important;
+            max-width: 40px !important;
+            vertical-align: middle;
+        }
+        
+        /* ボタン全般：文字サイズを小さく、余白を削減 */
+        .action-cell button {
+            font-size: 9px;
+            padding: 4px 6px;
+            border: none;
             border-radius: 4px;
-            background: white;
-            color: #2d5016;
             cursor: pointer;
-            font-weight: bold;
-            transition: all 0.2s ease;
-        }
-
-        .action-cell button:hover {
-            background: #e8f5e9;
-            transform: translateX(-50%) scale(1.05) !important;
-        }
-
-        .action-cell button:active {
-            transform: translateX(-50%) scale(0.95) !important;
-        }
-
-        .paypay-block {
-            margin-top: 20px;
-            padding: 18px;
-            border-radius: 16px;
-            background: #ff0033;
-            color: #fff;
-            text-align: center;
-            display: none;
-            gap: 12px;
-            flex-direction: column;
+            margin: 0;
+            width: 38px;
+            height: 20px;
+            display: flex;
             align-items: center;
-        }
-
-        .paypay-block__title {
-            margin: 0 0 6px;
-            font-size: 1rem;
-            font-weight: 700;
-            letter-spacing: 0.08em;
-        }
-
-        .paypay-button {
-            display: inline-flex;
             justify-content: center;
-            align-items: center;
-            width: 100%;
-            padding: 12px 16px;
-            border-radius: 999px;
-            background: rgba(255, 255, 255, 0.18);
-            color: #fff;
-            text-decoration: none;
-            font-weight: 700;
-            letter-spacing: 0.04em;
-            border: 2px solid rgba(255, 255, 255, 0.35);
-            transition: background 0.2s ease;
-        }
-
-        .paypay-button:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        .paypay-button--disabled {
-            cursor: not-allowed;
-            opacity: 0.7;.history-table
-            text-decoration: none;
-        }
-        /* ==== 最終ポイント表のスタイル ==== */
-        .final-points-table th:nth-child(1),
-        .final-points-table td:nth-child(1) {
-            width: 60px !important;
-            min-width: 60px !important;
-            max-width: 60px !important;
-            text-align: center !important;
-            vertical-align: middle !important;
-        }
-        
-        .final-points-table th:nth-child(2),
-        .final-points-table td:nth-child(2) {
-            width: 45px !important;
-            min-width: 45px !important;
-            max-width: 45px !important;
-            text-align: center !important;
-            vertical-align: middle !important;
-        }
-        
-        .final-points-table th:nth-child(3),
-        .final-points-table td:nth-child(3) {
-            width: 45px !important;
-            min-width: 45px !important;
-            max-width: 45px !important;
-            text-align: center !important;
-            vertical-align: middle !important;
-        }
-        
-        .final-points-table th:nth-child(4),
-        .final-points-table td:nth-child(4) {
-            width: 45px !important;
-            min-width: 45px !important;
-            max-width: 45px !important;
-            text-align: center !important;
-            vertical-align: middle !important;
-        }
-        
-        .final-points-table th:nth-child(5),
-        .final-points-table td:nth-child(5) {
-            width: auto !important;
-            text-align: center !important;
-            vertical-align: middle !important;
-            font-weight: bold;
-        }
-        
-        .final-points-table th,
-        .final-points-table td {
+            box-sizing: border-box;
             white-space: nowrap;
-            text-align: center;
-            vertical-align: middle !important;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        /* 編集ボタン：通常のボタンスタイル */
+        .action-cell button:first-child {
+            background: #666;
+            color: white;
+        }
+        
+        /* 削除ボタン：赤色 */
+        .action-cell button:nth-child(2),
+        .action-cell button:only-child {
+            background: #c41e3a;
+            color: white;
+        }
+        
+        /* ボタンホバー効果 */
+        .action-cell button:hover {
+            opacity: 0.8;
         }
 
-        /* 最終ポイント表では、対局履歴用の「上詰め180px」を打ち消す */
-        .final-points-table td:nth-child(2),
-        .final-points-table td:nth-child(3),
-        .final-points-table td:nth-child(4),
-        .final-points-table td:nth-child(5){
-            vertical-align: middle !important;  /* 上書き */
-            min-height: auto !important;        /* 180px を解除してコンパクトに */
+        .final-points-table {
+            width: 100%;
+            margin-bottom: 15px;
         }
-        
-        /* ついでにテーブル全体も標準の高さでOKなら */
-        .final-points-table td,
+
         .final-points-table th {
-            height: auto !important;
+            background: linear-gradient(135deg, #2d5016 0%, #1a3d0a 100%);
+            color: white;
+            padding: 8px;
+            font-size: 12px;
+        }
+
+        .final-points-table td {
+            padding: 8px;
+            font-size: 13px;
         }
         
-        /* カスタムエラーダイアログ */
+        /* ==== カスタムダイアログのスタイル ==== */
         .custom-alert-overlay {
+            display: none;
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.5);
-            z-index: 20000;
-            display: none;
-            align-items: center;
             justify-content: center;
+            align-items: center;
+            z-index: 10000;
         }
         
         .custom-alert-box {
             background: white;
             border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-            max-width: 400px;
-            width: 90%;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            max-width: 90%;
+            width: 400px;
             overflow: hidden;
         }
         
         .custom-alert-header {
             background: #c41e3a;
             color: white;
-            padding: 15px 20px;
+            padding: 15px;
             font-weight: bold;
-            font-size: 16px;
+            font-size: 18px;
         }
         
         .custom-alert-body {
             padding: 20px;
+            font-size: 16px;
             color: #333;
-            font-size: 14px;
             line-height: 1.6;
         }
         
         .custom-alert-footer {
-            padding: 15px 20px;
+            padding: 15px;
+            background: #f5f5f5;
             text-align: right;
-            border-top: 1px solid #e0e0e0;
         }
         
         .custom-alert-button {
-            background: linear-gradient(135deg, #c41e3a 0%, #9a1529 100%);
+            background: #c41e3a;
             color: white;
             border: none;
-            padding: 10px 24px;
+            padding: 10px 20px;
             border-radius: 6px;
             font-size: 14px;
             font-weight: bold;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: opacity 0.2s ease;
         }
         
         .custom-alert-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(196, 30, 58, 0.4);
+            opacity: 0.8;
         }
         
-        .custom-alert-button:active {
-            transform: translateY(0);
+        /* パスワード入力画面のスタイル */
+        #passwordOverlay {
+            display: flex;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #2d5016 0%, #1a3d0a 100%);
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
         }
         
-        /* エラーダイアログは最前面に */
-        #customAlertOverlay {
-            z-index: 30000;
+        .password-box {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            max-width: 400px;
+            width: 90%;
         }
         
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateX(-50%) translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(-50%) translateY(0);
-            }
+        .password-box h2 {
+            color: #c41e3a;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .password-box input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #2d5016;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+        
+        .password-box button {
+            width: 100%;
+            background: linear-gradient(135deg, #c41e3a 0%, #9a1529 100%);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .password-error {
+            color: #c41e3a;
+            font-size: 14px;
+            margin-top: 10px;
+            text-align: center;
         }
     </style>
 </head>
 <body>
-    <!-- パスワード保護のオーバーレイ -->
-    <div id="passwordOverlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:linear-gradient(135deg, #2d5016 0%, #1a3d0a 100%); z-index:10000; display:flex; align-items:center; justify-content:center;">
-        <div style="background:white; padding:30px; border-radius:15px; box-shadow:0 10px 30px rgba(0,0,0,0.3); text-align:center; max-width:400px; width:90%;">
-            <h2 style="color:#2d5016; margin-bottom:20px;">🀄 麻雀スコアシート 🀄</h2>
-            <p style="color:#666; margin-bottom:20px;">アクセスにはパスワードが必要です</p>
-            <input type="password" id="passwordInput" placeholder="パスワードを入力" 
-                style="width:100%; padding:12px; border:2px solid #2d5016; border-radius:8px; font-size:16px; margin-bottom:15px;">
-            <button onclick="checkPassword()" 
-                style="width:100%; background:linear-gradient(135deg, #c41e3a 0%, #9a1529 100%); color:white; border:none; padding:12px; border-radius:8px; font-size:16px; font-weight:bold; cursor:pointer;">
-                ログイン
-            </button>
-            <p id="passwordError" style="color:#c41e3a; margin-top:10px; font-size:14px;"></p>
+    <!-- パスワード入力画面 -->
+    <div id="passwordOverlay">
+        <div class="password-box">
+            <h2>🀄 麻雀スコアシート 🀄</h2>
+            <input type="password" id="passwordInput" placeholder="パスワードを入力">
+            <button onclick="checkPassword()">ログイン</button>
+            <div id="passwordError" class="password-error"></div>
         </div>
     </div>
 
-    <!-- カスタムエラーダイアログ -->
+    <!-- カスタムダイアログ -->
     <div id="customAlertOverlay" class="custom-alert-overlay">
         <div class="custom-alert-box">
             <div class="custom-alert-header" id="customAlertTitle">エラー</div>
-            <div class="custom-alert-body" id="customAlertMessage"></div>
+            <div class="custom-alert-body" id="customAlertMessage">
+                エラーメッセージ
+            </div>
             <div class="custom-alert-footer">
                 <button class="custom-alert-button" onclick="closeCustomAlert()">OK</button>
             </div>
         </div>
     </div>
+
     <!-- 編集ダイアログ -->
     <div id="editDialogOverlay" class="custom-alert-overlay">
         <div class="custom-alert-box">
@@ -997,16 +917,24 @@
         let deletingSectionIndex = null;
         let deletingGameIndex = null;
         
-        // 削除ダイアログを表示
+        // 削除ダイアログを表示（③修正：個別の半荘削除時のメッセージをカスタマイズ）
         function showDeleteDialog(sectionIndex, gameIndex) {
             deletingSectionIndex = sectionIndex;
             deletingGameIndex = gameIndex;
+            
+            // 個別の半荘削除の場合はメッセージをカスタマイズ
+            if (gameIndex !== null) {
+                document.getElementById('deleteDialogMessage').textContent = 'この半荘を削除して良いですか？';
+            }
+            
             document.getElementById('deleteDialogOverlay').style.display = 'flex';
         }
         
-        // 削除ダイアログを閉じる
+        // 削除ダイアログを閉じる（③修正：メッセージをデフォルトに戻す）
         function closeDeleteDialog() {
             document.getElementById('deleteDialogOverlay').style.display = 'none';
+            // メッセージをデフォルトに戻す
+            document.getElementById('deleteDialogMessage').textContent = '本当にこの対局を削除しますか?';
             deletingSectionIndex = null;
             deletingGameIndex = null;
         }
@@ -1185,7 +1113,42 @@
                 const passwordInput = document.getElementById('passwordInput');
                 if (passwordInput) passwordInput.focus();
             }
+            
+            // ②点数の自動入力機能を初期化
+            setupAutoCalculation();
         });
+        
+        // ②点数の自動入力機能
+        function setupAutoCalculation() {
+            const score1 = document.getElementById('score1');
+            const score2 = document.getElementById('score2');
+            const score3 = document.getElementById('score3');
+            
+            if (!score1 || !score2 || !score3) return;
+            
+            function autoFillScore() {
+                const s1 = parseInt(score1.value) || 0;
+                const s2 = parseInt(score2.value) || 0;
+                const s3 = parseInt(score3.value) || 0;
+                
+                // score1とscore2が入力されていて、score3が空の場合
+                if (score1.value && score2.value && !score3.value) {
+                    score3.value = 105000 - s1 - s2;
+                }
+                // score1とscore3が入力されていて、score2が空の場合
+                else if (score1.value && score3.value && !score2.value) {
+                    score2.value = 105000 - s1 - s3;
+                }
+                // score2とscore3が入力されていて、score1が空の場合
+                else if (score2.value && score3.value && !score1.value) {
+                    score1.value = 105000 - s2 - s3;
+                }
+            }
+            
+            score1.addEventListener('input', autoFillScore);
+            score2.addEventListener('input', autoFillScore);
+            score3.addEventListener('input', autoFillScore);
+        }
     </script>
 
     <div class="container" id="mainContainer" style="display: none;">
@@ -1580,22 +1543,17 @@
                 document.getElementById('doubleTobashi3').checked
             ];
             
-            // 飛ばし・ダブル飛ばしと飛びの対応チェック
+            // ①飛ばし・ダブル飛ばしと飛びの対応チェック（修正版）
             const tobashiCount = tobashiFlags.filter(x => x).length;
             const doubleTobashiCount = doubleTobashiFlags.filter(x => x).length;
             const tobiCount = tobiFlags.filter(x => x).length;
             
             console.log('飛ばし:', tobashiCount, 'ダブル飛ばし:', doubleTobashiCount, '飛び:', tobiCount);
             
-            // 飛ばしと飛びの1対1チェック
-            if (tobashiCount > 0 && tobashiCount !== tobiCount) {
-                showError('「飛ばし」と「飛び」の人数が一致していません');
-                return;
-            }
-            
-            // ダブル飛ばしと飛びの1対2チェック
-            if (doubleTobashiCount > 0 && doubleTobashiCount * 2 !== tobiCount) {
-                showError('「ダブル飛ばし」と「飛び」の人数が一致していません');
+            // 通常の飛ばし1つ = 飛び1つ、ダブル飛ばし1つ = 飛び2つ
+            const totalTobashiEquivalent = tobashiCount + (doubleTobashiCount * 2);
+            if (totalTobashiEquivalent !== tobiCount) {
+                showError('「飛ばし」「ダブル飛ばし」と「飛び」の人数が対応していません');
                 return;
             }
             
@@ -2216,5 +2174,3 @@
     </script>
 </body>
 </html>
-
-
