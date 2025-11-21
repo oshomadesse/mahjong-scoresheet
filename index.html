@@ -1051,16 +1051,12 @@
                         }
                     }
                 } else {
-                    // 節全体を削除
-                    if (sections.length > 1) {
-                        sections.splice(deletingSectionIndex, 1);
-                        if (currentSectionIndex >= sections.length) {
-                            currentSectionIndex = sections.length - 1;
-                        }
-                    } else {
-                        showError('最後の節は削除できません');
-                        closeDeleteDialog();
-                        return;
+                    // 節全体を削除（最後の1節でも許可）
+                    sections.splice(deletingSectionIndex, 1);
+                    
+                    if (sections.length === 0) {
+                        } else if (currentSectionIndex >= sections.length) {
+                        currentSectionIndex = sections.length - 1;
                     }
                 }
                 
@@ -2324,6 +2320,7 @@
     </script>
 </body>
 </html>
+
 
 
 
