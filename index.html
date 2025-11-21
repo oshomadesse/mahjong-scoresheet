@@ -866,6 +866,20 @@
         // --- API設定 ---
         let API_TOKEN = null;
         const API_URL = "https://mahjong-scoresheet-api.oshomadesse.workers.dev/mahjong";
+
+        // --- グローバル変数 ---
+        const players = ['🦎ジェッツ西方🦎', '🐺ビースト高橋🐺', '🥊ファイト大田🥊'];
+        const shortNames = players.map(p => {
+            const chars = Array.from(p);  // 絵文字を正しく扱うために配列化
+            const emojiStart = chars[0];   // 最初の文字（絵文字）
+            const emojiEnd = chars[chars.length - 1];   // 最後の文字（絵文字）
+            const name = p.replace(/.*(西方|高橋|大田).*/, "$1"); // 名字抽出
+            return `${emojiStart}${name}${emojiEnd}`;
+        });
+        
+        let sections = []; // 節ごとのデータ [{games: [...]}]
+        let currentSectionIndex = 0; // 現在表示中の節のインデックス
+        let rankingMode = 'today'; // 'today' or 'total'
         
         // カスタムエラーダイアログ
         function showDialog(message, title = 'エラー', headerColor = '#c41e3a') {
@@ -1417,19 +1431,6 @@
         function requestPassword() {
             API_TOKEN = prompt("パスワードを入力してください：");
         }
-        
-        const players = ['🦎ジェッツ西方🦎', '🐺ビースト高橋🐺', '🥊ファイト大田🥊'];
-        const shortNames = players.map(p => {
-            const chars = Array.from(p);  // 絵文字を正しく扱うために配列化
-            const emojiStart = chars[0];   // 最初の文字（絵文字）
-            const emojiEnd = chars[chars.length - 1];   // 最後の文字（絵文字）
-            const name = p.replace(/.*(西方|高橋|大田).*/, "$1"); // 名字抽出
-            return `${emojiStart}${name}${emojiEnd}`;
-        });
-        
-        let sections = []; // 節ごとのデータ [{games: [...]}]
-        let currentSectionIndex = 0; // 現在表示中の節のインデックス
-        let rankingMode = 'today'; // 'today' or 'total'
 
         // -------------------------
         // Cloudflare Worker からデータを読み込み
@@ -2280,6 +2281,7 @@
     </script>
 </body>
 </html>
+
 
 
 
