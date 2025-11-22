@@ -771,7 +771,7 @@
             <div class="custom-alert-body">
                 <div style="display: flex; flex-direction: column; gap: 15px;">
                     <div>
-                        <label style="font-weight: bold; color: #2d5016; display: block; margin-bottom: 5px;">🦎西方</label>
+                        <label style="font-weight: bold; color: #2d5016; display: block; margin-bottom: 5px;">🛡️西方</label>
                         <div style="display: flex; gap: 10px;">
                             <div style="flex: 1;">
                                 <label style="font-size: 12px; color: #666;">点数</label>
@@ -797,7 +797,7 @@
                         </div>
                     </div>
                     <div>
-                        <label style="font-weight: bold; color: #2d5016; display: block; margin-bottom: 5px;">🥊大田</label>
+                        <label style="font-weight: bold; color: #2d5016; display: block; margin-bottom: 5px;">🐲大田</label>
                         <div style="display: flex; gap: 10px;">
                             <div style="flex: 1;">
                                 <label style="font-size: 12px; color: #666;">点数</label>
@@ -868,7 +868,7 @@
         const API_URL = "https://mahjong-scoresheet-api.oshomadesse.workers.dev/mahjong";
 
         // --- グローバル変数 ---
-        const players = ['🦎ジェッツ西方🦎', '🐺ビースト高橋🐺', '🥊ファイト大田🥊'];
+        const players = ['🛡️ジェッツ西方🛡️', '🐺ビースト高橋🐺', '🐲ファイト大田🐲'];
         const shortNames = players.map(p => {
             const chars = Array.from(p);  // 絵文字を正しく扱うために配列化
             const emojiStart = chars[0];   // 最初の文字（絵文字）
@@ -1300,7 +1300,7 @@
             </h3>
             <div class="input-grid">
                 <div class="input-item">
-                    <label>🦎ジェッツ西方🦎</label>
+                    <label>🛡️ジェッツ西方🛡️</label>
                     <input type="number" id="score1" placeholder="点数を入力" step="100">
                     <div class="yakuman-check">
                         <div>
@@ -1356,7 +1356,7 @@
                     </div>
                 </div>
                 <div class="input-item">
-                    <label>🥊ファイト大田🥊</label>
+                    <label>🐲ファイト大田🐲</label>
                     <input type="number" id="score3" placeholder="点数を入力" step="100">
                     <div class="yakuman-check">
                         <div>
@@ -1399,9 +1399,9 @@
                     <thead>
                         <tr>
                             <th>半荘</th>
-                            <th>🦎西方</th>
+                            <th>🛡️西方</th>
                             <th>🐺高橋</th>
-                            <th>🥊大田</th>
+                            <th>🐲大田</th>
                             <th>操作</th>
                         </tr>
                     </thead>
@@ -1428,9 +1428,9 @@
                 <label>支払い者</label>
                 <select id="payer" 
                     style="padding:15px; font-size:18px; border:2px solid #2d5016; border-radius:12px; width:100%;">
-                    <option value="0">🦎ジェッツ西方🦎</option>
+                    <option value="0">🛡️ジェッツ西方🛡️</option>
                     <option value="1">🐺ビースト高橋🐺</option>
-                    <option value="2">🥊ファイト大田🥊</option>
+                    <option value="2">🐲ファイト大田🐲</option>
                 </select>
             </div>
         <button class="btn" onclick="calcFinalPoints()">チェック</button>
@@ -2320,6 +2320,7 @@
     </script>
 </body>
 </html>
+
 
 
 
