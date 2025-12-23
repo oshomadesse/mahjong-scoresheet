@@ -1560,14 +1560,26 @@
             const tobashiCount = tobashiFlags.filter(x => x).length;
             const doubleTobashiCount = doubleTobashiFlags.filter(x => x).length;
             
-            // 通常の飛ばしのボーナス配分
-            if (tobashiCount > 0) {
+            // 特殊ケース: 飛ばし2つ、飛び1つの場合
+            const isSpecialCase = (tobashiCount === 2 && doubleTobashiCount === 0 && tobiCount === 1);
+            
+            if (isSpecialCase) {
+                // 飛ばしの2人に+5ptずつ
                 tobashiFlags.forEach((isTobashi, index) => {
                     if (isTobashi) {
-                        // 飛ばし1人につき +10ポイント
-                        finalPoints[index] += 10;
+                        finalPoints[index] += 5;
                     }
                 });
+            } else {
+                // 通常の飛ばしのボーナス配分
+                if (tobashiCount > 0) {
+                    tobashiFlags.forEach((isTobashi, index) => {
+                        if (isTobashi) {
+                            // 飛ばし1人につき +10ポイント
+                            finalPoints[index] += 10;
+                        }
+                    });
+                }
             }
             
             // ダブル飛ばしのボーナス配分
@@ -1694,7 +1706,11 @@
             
             // 通常の飛ばし1つ = 飛び1つ、ダブル飛ばし1つ = 飛び2つ
             const totalTobashiEquivalent = tobashiCount + (doubleTobashiCount * 2);
-            if (totalTobashiEquivalent !== tobiCount) {
+            
+            // 特殊ケース: 飛ばし2つ、飛び1つは許可
+            const isSpecialCase = (tobashiCount === 2 && doubleTobashiCount === 0 && tobiCount === 1);
+            
+            if (!isSpecialCase && totalTobashiEquivalent !== tobiCount) {
                 showError('「飛ばし」「ダブル飛ばし」と「飛び」の人数が対応していません');
                 return;
             }
@@ -2321,6 +2337,7 @@
     </script>
 </body>
 </html>
+
 
 
 
