@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>麻雀スコアシート</title>
     <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * {
             margin: 0;
@@ -1451,6 +1452,16 @@
             </div>
         </div>
 
+        <!-- ポイント推移グラフ -->
+        <div class="section">
+            <h3 class="section-title">
+                <span>📈 ポイント推移</span>
+            </h3>
+            <div style="background: white; border-radius: 8px; padding: 10px; border: 2px solid #2d5016;">
+                <canvas id="pointTrendChart"></canvas>
+            </div>
+        </div>
+
         <!-- 最終ポイント -->
         <div class="section">
             <h3 class="section-title">
@@ -1915,6 +1926,130 @@
             });
         }
 
+        // ポイント推移グラフ
+        let pointTrendChartInstance = null;
+
+        function updatePointTrendChart() {
+            const ctx = document.getElementById('pointTrendChart').getContext('2d');
+            const section = sections[currentSectionIndex];
+
+            // 既存のチャートがあれば破棄
+            if (pointTrendChartInstance) {
+                pointTrendChartInstance.destroy();
+            }
+
+            // データなしの場合
+            if (!section || !section.games || section.games.length === 0) {
+                pointTrendChartInstance = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ['開始'],
+                        datasets: [
+                            { label: '🛡️西方', data: [0], borderColor: '#006835', backgroundColor: '#006835', tension: 0.1 },
+                            { label: '🐺高橋', data: [0], borderColor: '#4A5968', backgroundColor: '#4A5968', tension: 0.1 },
+                            { label: '🐲大田', data: [0], borderColor: '#B60114', backgroundColor: '#B60114', tension: 0.1 }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { position: 'top' }
+                        },
+                        scales: {
+                            y: { beginAtZero: false }
+                        }
+                    }
+                });
+                return;
+            }
+
+            // ラベルと累積ポイントを計算
+            const labels = ['開始'];
+            let nTotal = 0, tTotal = 0, oTotal = 0;
+            const nishikataData = [0];
+            const takahashiData = [0];
+            const otaData = [0];
+
+            section.games.forEach((game, index) => {
+                labels.push(`${index + 1}半荘`);
+                nTotal += game.points[0];
+                tTotal += game.points[1];
+                oTotal += game.points[2];
+                nishikataData.push(nTotal);
+                takahashiData.push(tTotal);
+                otaData.push(oTotal);
+            });
+
+            // グラフ描画
+            pointTrendChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: '🛡️西方',
+                            data: nishikataData,
+                            borderColor: '#006835',
+                            backgroundColor: '#006835',
+                            borderWidth: 2,
+                            tension: 0.1,
+                            pointRadius: 4
+                        },
+                        {
+                            label: '🐺高橋',
+                            data: takahashiData,
+                            borderColor: '#4A5968',
+                            backgroundColor: '#4A5968',
+                            borderWidth: 2,
+                            tension: 0.1,
+                            pointRadius: 4
+                        },
+                        {
+                            label: '🐲大田',
+                            data: otaData,
+                            borderColor: '#B60114',
+                            backgroundColor: '#B60114',
+                            borderWidth: 2,
+                            tension: 0.1,
+                            pointRadius: 4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            title: {
+                                display: true,
+                                text: 'ポイント'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: ''
+                            }
+                        }
+                    },
+                    interaction: {
+                        mode: 'nearest',
+                        axis: 'x',
+                        intersect: false
+                    }
+                }
+            });
+        }
+
         // 履歴を更新
         function updateHistory() {
             const historyList = document.getElementById('historyList');
@@ -2095,6 +2230,9 @@
                     }
                 });
             }, 0);
+
+            // ポイント推移グラフを更新
+            updatePointTrendChart();
         }
 
         //最終ロジック（最小送ポイント回数アルゴリズム）
