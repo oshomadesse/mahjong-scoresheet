@@ -1137,16 +1137,35 @@
                 return false;
             }
 
-            function saveAuth() {
+            function saveAuth(token) {
                 sessionStorage.setItem('mahjong-auth', JSON.stringify({
-                    timestamp: Date.now()
+                    timestamp: Date.now(),
+                    token: token
                 }));
             }
 
             function updateAuthTimestamp() {
-                sessionStorage.setItem('mahjong-auth', JSON.stringify({
-                    timestamp: Date.now()
-                }));
+                const authData = sessionStorage.getItem('mahjong-auth');
+                if (authData) {
+                    const parsed = JSON.parse(authData);
+                    sessionStorage.setItem('mahjong-auth', JSON.stringify({
+                        timestamp: Date.now(),
+                        token: parsed.token
+                    }));
+                }
+            }
+
+            function getStoredToken() {
+                const authData = sessionStorage.getItem('mahjong-auth');
+                if (authData) {
+                    try {
+                        const { token } = JSON.parse(authData);
+                        return token || null;
+                    } catch (e) {
+                        return null;
+                    }
+                }
+                return null;
             }
 
         
@@ -1169,10 +1188,10 @@
 
                     if (res.status === 200) {
                         console.log('認証成功！');
-                        
-                        // 認証成功 → セッション保存
+
+                        // 認証成功 → セッション保存（トークンも含む）
                         API_TOKEN = pass;
-                        saveAuth();
+                        saveAuth(pass);
 
                         // UI 切り替え
                         document.getElementById('passwordOverlay').style.display = 'none';
@@ -1218,10 +1237,22 @@
             
             // ページ読み込み時の認証チェック
             if (checkAuth()) {
-                const overlay = document.getElementById('passwordOverlay');
-                const container = document.getElementById('mainContainer');
-                if (overlay) overlay.style.display = 'none';
-                if (container) container.style.display = 'block';
+                // トークンを復元
+                const storedToken = getStoredToken();
+                if (storedToken) {
+                    API_TOKEN = storedToken;
+                    const overlay = document.getElementById('passwordOverlay');
+                    const container = document.getElementById('mainContainer');
+                    if (overlay) overlay.style.display = 'none';
+                    if (container) container.style.display = 'block';
+                    // データをロード
+                    loadData();
+                } else {
+                    // トークンがない場合は再認証
+                    sessionStorage.removeItem('mahjong-auth');
+                    const passwordInput = document.getElementById('passwordInput');
+                    if (passwordInput) passwordInput.focus();
+                }
             } else {
                 const passwordInput = document.getElementById('passwordInput');
                 if (passwordInput) passwordInput.focus();
