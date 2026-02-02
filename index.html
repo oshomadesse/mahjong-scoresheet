@@ -1490,8 +1490,8 @@
                 return;
             }
         
-            // ② Worker へ GET して最新データ取得
-            const res = await fetch(API_URL, {
+            // ② Worker へ GET して全スナップショットをマージ取得
+            const res = await fetch(`${API_URL}/snapshots/all`, {
                 method: "GET",
                 headers: {
                     "x-access-token": API_TOKEN
