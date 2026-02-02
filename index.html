@@ -414,6 +414,17 @@
             font-weight: bold;
         }
 
+        .triple-yakuman-badge {
+            background: #000000;
+            color: white;
+            font-size: 9px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-top: 4px;
+            display: inline-block;
+            font-weight: bold;
+        }
+
         .no-badge {
             background: #cccccc;
             color: white;
@@ -1345,26 +1356,30 @@
                     <input type="number" id="score1" placeholder="点数を入力" step="100">
                     <div class="yakuman-check">
                         <div>
-                            <input type="checkbox" id="tobashi1">
-                            <label for="tobashi1">飛ばし</label>
-                        </div>
-                        <div>
                             <input type="checkbox" id="tobi1">
                             <label for="tobi1">飛び</label>
                         </div>
                         <div>
-                            <input type="checkbox" id="yakuman1">
-                            <label for="yakuman1">役満</label>
+                            <input type="checkbox" id="tobashi1">
+                            <label for="tobashi1">飛ばし</label>
                         </div>
-                    </div>
-                    <div class="yakuman-check">
                         <div>
                             <input type="checkbox" id="doubleTobashi1">
                             <label for="doubleTobashi1">ダブル飛ばし</label>
                         </div>
+                    </div>
+                    <div class="yakuman-check">
+                        <div>
+                            <input type="checkbox" id="yakuman1">
+                            <label for="yakuman1">役満</label>
+                        </div>
                         <div>
                             <input type="checkbox" id="doubleYakuman1">
                             <label for="doubleYakuman1">ダブル役満</label>
+                        </div>
+                        <div>
+                            <input type="checkbox" id="tripleYakuman1">
+                            <label for="tripleYakuman1">トリプル役満</label>
                         </div>
                     </div>
                 </div>
@@ -1373,26 +1388,30 @@
                     <input type="number" id="score2" placeholder="点数を入力" step="100">
                     <div class="yakuman-check">
                         <div>
-                            <input type="checkbox" id="tobashi2">
-                            <label for="tobashi2">飛ばし</label>
-                        </div>
-                        <div>
                             <input type="checkbox" id="tobi2">
                             <label for="tobi2">飛び</label>
                         </div>
                         <div>
-                            <input type="checkbox" id="yakuman2">
-                            <label for="yakuman2">役満</label>
+                            <input type="checkbox" id="tobashi2">
+                            <label for="tobashi2">飛ばし</label>
                         </div>
-                    </div>
-                    <div class="yakuman-check">
                         <div>
                             <input type="checkbox" id="doubleTobashi2">
                             <label for="doubleTobashi2">ダブル飛ばし</label>
                         </div>
+                    </div>
+                    <div class="yakuman-check">
+                        <div>
+                            <input type="checkbox" id="yakuman2">
+                            <label for="yakuman2">役満</label>
+                        </div>
                         <div>
                             <input type="checkbox" id="doubleYakuman2">
                             <label for="doubleYakuman2">ダブル役満</label>
+                        </div>
+                        <div>
+                            <input type="checkbox" id="tripleYakuman2">
+                            <label for="tripleYakuman2">トリプル役満</label>
                         </div>
                     </div>
                 </div>
@@ -1401,26 +1420,30 @@
                     <input type="number" id="score3" placeholder="点数を入力" step="100">
                     <div class="yakuman-check">
                         <div>
-                            <input type="checkbox" id="tobashi3">
-                            <label for="tobashi3">飛ばし</label>
-                        </div>
-                        <div>
                             <input type="checkbox" id="tobi3">
                             <label for="tobi3">飛び</label>
                         </div>
                         <div>
-                            <input type="checkbox" id="yakuman3">
-                            <label for="yakuman3">役満</label>
+                            <input type="checkbox" id="tobashi3">
+                            <label for="tobashi3">飛ばし</label>
                         </div>
-                    </div>
-                    <div class="yakuman-check">
                         <div>
                             <input type="checkbox" id="doubleTobashi3">
                             <label for="doubleTobashi3">ダブル飛ばし</label>
                         </div>
+                    </div>
+                    <div class="yakuman-check">
+                        <div>
+                            <input type="checkbox" id="yakuman3">
+                            <label for="yakuman3">役満</label>
+                        </div>
                         <div>
                             <input type="checkbox" id="doubleYakuman3">
                             <label for="doubleYakuman3">ダブル役満</label>
+                        </div>
+                        <div>
+                            <input type="checkbox" id="tripleYakuman3">
+                            <label for="tripleYakuman3">トリプル役満</label>
                         </div>
                     </div>
                 </div>
@@ -1558,7 +1581,7 @@
 
 
         // ポイント計算関数
-        function calculatePoints(scores, yakumanFlags, tobashiFlags, tobiFlags, doubleYakumanFlags, doubleTobashiFlags) {
+        function calculatePoints(scores, yakumanFlags, tobashiFlags, tobiFlags, doubleYakumanFlags, doubleTobashiFlags, tripleYakumanFlags) {
             // 40000を引いて1000で割る
             const basePoints = scores.map(score => (score - 40000) / 1000);
             
@@ -1669,7 +1692,23 @@
                     }
                 }
             });
-            
+
+            // トリプル役満の処理（役満の3倍）
+            if (tripleYakumanFlags) {
+                tripleYakumanFlags.forEach((hasTriple, index) => {
+                    if (hasTriple) {
+                        // アガった人に +120
+                        finalPoints[index] += 120;
+                        // 他2人に −60ずつ
+                        for (let i = 0; i < 3; i++) {
+                            if (i !== index) {
+                                finalPoints[i] -= 60;
+                            }
+                        }
+                    }
+                });
+            }
+
             return finalPoints;
         }
 
@@ -1746,7 +1785,12 @@
                 document.getElementById('doubleTobashi2').checked,
                 document.getElementById('doubleTobashi3').checked
             ];
-            
+            const tripleYakumanFlags = [
+                document.getElementById('tripleYakuman1').checked,
+                document.getElementById('tripleYakuman2').checked,
+                document.getElementById('tripleYakuman3').checked
+            ];
+
             // 飛ばし・ダブル飛ばしと飛びの対応チェック
             const tobashiCount = tobashiFlags.filter(x => x).length;
             const doubleTobashiCount = doubleTobashiFlags.filter(x => x).length;
@@ -1765,13 +1809,14 @@
                 return;
             }
             
-            const points = calculatePoints(scores, yakumanFlags, tobashiFlags, tobiFlags, doubleYakumanFlags, doubleTobashiFlags);
+            const points = calculatePoints(scores, yakumanFlags, tobashiFlags, tobiFlags, doubleYakumanFlags, doubleTobashiFlags, tripleYakumanFlags);
 
             const gameData = {
                 scores: scores,
                 points: points,
                 yakumanFlags: yakumanFlags,
                 doubleYakumanFlags: doubleYakumanFlags,
+                tripleYakumanFlags: tripleYakumanFlags,
                 tobashiFlags: tobashiFlags,
                 tobiFlags: tobiFlags,
                 doubleTobashiFlags: doubleTobashiFlags,
@@ -1816,6 +1861,9 @@
             document.getElementById('doubleYakuman1').checked = false;
             document.getElementById('doubleYakuman2').checked = false;
             document.getElementById('doubleYakuman3').checked = false;
+            document.getElementById('tripleYakuman1').checked = false;
+            document.getElementById('tripleYakuman2').checked = false;
+            document.getElementById('tripleYakuman3').checked = false;
             document.getElementById('tobashi1').checked = false;
             document.getElementById('tobashi2').checked = false;
             document.getElementById('tobashi3').checked = false;
@@ -2130,11 +2178,8 @@
                 // 各プレイヤーの情報
                 players.forEach((name, playerIndex) => {
                     const cell = document.createElement('td');
-                    const yakumanBadge = game.yakumanFlags && game.yakumanFlags[playerIndex] 
-                        ? '<div class="yakuman-badge">役満</div>' 
-                        : '';
-                    const doubleYakumanBadge = game.doubleYakumanFlags && game.doubleYakumanFlags[playerIndex]
-                        ? '<div class="double-yakuman-badge">ダブル役満</div>'
+                    const tobiBadge = game.tobiFlags && game.tobiFlags[playerIndex]
+                        ? '<div class="tobi-badge">飛び</div>'
                         : '';
                     const tobashiBadge = game.tobashiFlags && game.tobashiFlags[playerIndex]
                         ? '<div class="tobashi-badge">飛ばし</div>'
@@ -2142,11 +2187,17 @@
                     const doubleTobashiBadge = game.doubleTobashiFlags && game.doubleTobashiFlags[playerIndex]
                         ? '<div class="double-tobashi-badge">ダブル飛ばし</div>'
                         : '';
-                    const tobiBadge = game.tobiFlags && game.tobiFlags[playerIndex]
-                        ? '<div class="tobi-badge">飛び</div>'
+                    const yakumanBadge = game.yakumanFlags && game.yakumanFlags[playerIndex]
+                        ? '<div class="yakuman-badge">役満</div>'
                         : '';
-                    
-                    let badgesHtml = yakumanBadge + doubleYakumanBadge + tobashiBadge + doubleTobashiBadge + tobiBadge;
+                    const doubleYakumanBadge = game.doubleYakumanFlags && game.doubleYakumanFlags[playerIndex]
+                        ? '<div class="double-yakuman-badge">ダブル役満</div>'
+                        : '';
+                    const tripleYakumanBadge = game.tripleYakumanFlags && game.tripleYakumanFlags[playerIndex]
+                        ? '<div class="triple-yakuman-badge">トリプル役満</div>'
+                        : '';
+
+                    let badgesHtml = tobiBadge + tobashiBadge + doubleTobashiBadge + yakumanBadge + doubleYakumanBadge + tripleYakumanBadge;
                     if (!badgesHtml.trim()) {
                         badgesHtml = '<div class="no-badge">なし</div>';
                     }
