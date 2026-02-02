@@ -1945,18 +1945,25 @@
                     data: {
                         labels: ['開始'],
                         datasets: [
-                            { label: '🛡️西方', data: [0], borderColor: '#006835', backgroundColor: '#006835', tension: 0.1 },
-                            { label: '🐺高橋', data: [0], borderColor: '#4A5968', backgroundColor: '#4A5968', tension: 0.1 },
-                            { label: '🐲大田', data: [0], borderColor: '#B60114', backgroundColor: '#B60114', tension: 0.1 }
+                            { label: '🛡️西方', data: [0], borderColor: '#006835', backgroundColor: '#006835', tension: 0.1, pointRadius: 1 },
+                            { label: '🐺高橋', data: [0], borderColor: '#4A5968', backgroundColor: '#4A5968', tension: 0.1, pointRadius: 1 },
+                            { label: '🐲大田', data: [0], borderColor: '#B60114', backgroundColor: '#B60114', tension: 0.1, pointRadius: 1 }
                         ]
                     },
                     options: {
                         responsive: true,
                         plugins: {
-                            legend: { position: 'top' }
+                            legend: {
+                                position: 'top',
+                                labels: {
+                                    font: { size: 10 },
+                                    boxWidth: 12,
+                                    padding: 8
+                                }
+                            }
                         },
                         scales: {
-                            y: { beginAtZero: false }
+                            y: { min: -30, max: 30 }
                         }
                     }
                 });
@@ -1980,6 +1987,13 @@
                 otaData.push(oTotal);
             });
 
+            // min/maxを動的に計算
+            const allData = [...nishikataData, ...takahashiData, ...otaData];
+            const maxPoint = Math.max(...allData);
+            const minPoint = Math.min(...allData);
+            const yMax = maxPoint + 30;
+            const yMin = minPoint - 30;
+
             // グラフ描画
             pointTrendChartInstance = new Chart(ctx, {
                 type: 'line',
@@ -1993,7 +2007,7 @@
                             backgroundColor: '#006835',
                             borderWidth: 2,
                             tension: 0.1,
-                            pointRadius: 4
+                            pointRadius: 1
                         },
                         {
                             label: '🐺高橋',
@@ -2002,7 +2016,7 @@
                             backgroundColor: '#4A5968',
                             borderWidth: 2,
                             tension: 0.1,
-                            pointRadius: 4
+                            pointRadius: 1
                         },
                         {
                             label: '🐲大田',
@@ -2011,7 +2025,7 @@
                             backgroundColor: '#B60114',
                             borderWidth: 2,
                             tension: 0.1,
-                            pointRadius: 4
+                            pointRadius: 1
                         }
                     ]
                 },
@@ -2019,7 +2033,12 @@
                     responsive: true,
                     plugins: {
                         legend: {
-                            position: 'top'
+                            position: 'top',
+                            labels: {
+                                font: { size: 10 },
+                                boxWidth: 12,
+                                padding: 8
+                            }
                         },
                         tooltip: {
                             mode: 'index',
@@ -2028,16 +2047,12 @@
                     },
                     scales: {
                         y: {
-                            beginAtZero: false,
-                            title: {
-                                display: true,
-                                text: 'ポイント'
-                            }
+                            min: yMin,
+                            max: yMax
                         },
                         x: {
-                            title: {
-                                display: true,
-                                text: ''
+                            ticks: {
+                                font: { size: 10 }
                             }
                         }
                     },
