@@ -1455,9 +1455,9 @@
         <!-- ポイント推移グラフ -->
         <div class="section">
             <h3 class="section-title">
-                <span>📈 ポイント推移</span>
+                <span>📈 合計ポイント推移</span>
             </h3>
-            <div style="background: white; border-radius: 8px; padding: 10px; border: 2px solid #2d5016;">
+            <div style="background: white; border-radius: 8px; padding: 10px; border: 2px solid #2d5016; min-height: 280px;">
                 <canvas id="pointTrendChart"></canvas>
             </div>
         </div>
@@ -1945,13 +1945,14 @@
                     data: {
                         labels: ['開始'],
                         datasets: [
-                            { label: '🛡️西方', data: [0], borderColor: '#006835', backgroundColor: '#006835', tension: 0.1, pointRadius: 1 },
-                            { label: '🐺高橋', data: [0], borderColor: '#4A5968', backgroundColor: '#4A5968', tension: 0.1, pointRadius: 1 },
-                            { label: '🐲大田', data: [0], borderColor: '#B60114', backgroundColor: '#B60114', tension: 0.1, pointRadius: 1 }
+                            { label: '西方', data: [0], borderColor: '#006835', backgroundColor: '#006835', tension: 0.1, pointRadius: 1 },
+                            { label: '高橋', data: [0], borderColor: '#4A5968', backgroundColor: '#4A5968', tension: 0.1, pointRadius: 1 },
+                            { label: '大田', data: [0], borderColor: '#B60114', backgroundColor: '#B60114', tension: 0.1, pointRadius: 1 }
                         ]
                     },
                     options: {
                         responsive: true,
+                        aspectRatio: 1.3,
                         plugins: {
                             legend: {
                                 position: 'top',
@@ -1988,12 +1989,12 @@
                 otaData.push(oTotal);
             });
 
-            // min/maxを動的に計算
+            // min/maxを動的に計算（100刻みに切り上げ/切り下げ）
             const allData = [...nishikataData, ...takahashiData, ...otaData];
             const maxPoint = Math.max(...allData);
             const minPoint = Math.min(...allData);
-            const yMax = maxPoint + 30;
-            const yMin = minPoint - 30;
+            const yMax = Math.ceil(maxPoint / 100) * 100;
+            const yMin = Math.floor(minPoint / 100) * 100;
 
             // グラフ描画
             pointTrendChartInstance = new Chart(ctx, {
@@ -2002,7 +2003,7 @@
                     labels: labels,
                     datasets: [
                         {
-                            label: '🛡️西方',
+                            label: '西方',
                             data: nishikataData,
                             borderColor: '#006835',
                             backgroundColor: '#006835',
@@ -2011,7 +2012,7 @@
                             pointRadius: 1
                         },
                         {
-                            label: '🐺高橋',
+                            label: '高橋',
                             data: takahashiData,
                             borderColor: '#4A5968',
                             backgroundColor: '#4A5968',
@@ -2020,7 +2021,7 @@
                             pointRadius: 1
                         },
                         {
-                            label: '🐲大田',
+                            label: '大田',
                             data: otaData,
                             borderColor: '#B60114',
                             backgroundColor: '#B60114',
@@ -2032,6 +2033,7 @@
                 },
                 options: {
                     responsive: true,
+                    aspectRatio: 1.3,
                     plugins: {
                         legend: {
                             position: 'top',
@@ -2050,7 +2052,15 @@
                     scales: {
                         y: {
                             min: yMin,
-                            max: yMax
+                            max: yMax,
+                            ticks: {
+                                stepSize: 100,
+                                font: { size: 9 }
+                            },
+                            grid: {
+                                color: (context) => context.tick.value === 0 ? '#333' : '#ddd',
+                                lineWidth: (context) => context.tick.value === 0 ? 2 : 1
+                            }
                         },
                         x: {
                             ticks: {
