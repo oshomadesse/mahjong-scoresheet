@@ -1202,7 +1202,15 @@
                         const data = await res.json();
                         console.log('データ取得成功:', data);
                         sections = data?.sections || [];
-                        
+
+                        // 初回利用の場合は空なら第1節を作る
+                        if (sections.length === 0) {
+                            sections.push({ games: [] });
+                        }
+
+                        // 最新の節をデフォルト表示
+                        currentSectionIndex = sections.length - 1;
+
                         updateRanking();
                         updateHistory();
 
@@ -1490,8 +1498,8 @@
                 return;
             }
         
-            // ② Worker へ GET して全スナップショットをマージ取得
-            const res = await fetch(`${API_URL}/snapshots/all`, {
+            // ② Worker へ GET してデータを取得
+            const res = await fetch(API_URL, {
                 method: "GET",
                 headers: {
                     "x-access-token": API_TOKEN
